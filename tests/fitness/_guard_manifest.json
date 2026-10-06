@@ -18,8 +18,9 @@
   "scripts/context/lib/complexity.py": "d42060cbd5b5bf1a716a79c97d450bf47144519fca752d3c55a7130324621e70",
   "scripts/context/lib/guards.py": "6609f016a3724107b81b888082c1e46303200b64926e4e3e56269269fb35b763",
   "scripts/context/lib/imports.py": "29a2ec25e50d4f70eb320f5bbfb913951b5117c3bff5d8cbda9aa37ea56c0259",
-  "scripts/context/lib/pack.py": "3bbfd3296b4d80c81cfd98b963442ca9a59c75643872a6404cc5c56d78306d64",
+  "scripts/context/lib/pack.py": "9af3691e5a4acc6b9f388a2853de630ec74a5765a5aff8e4c1098d48305f7671",
   "scripts/context/lib/paths.py": "22dab8f1585d5c1104c594ee1f8d024de5c0d180334e532f4b4baee7762deb03",
+  "scripts/context/lib/spine.py": "f13c502ff4530a45fbdedb14307d67a7c19fb48bb4d4a8f92d8ae9fb20badfe6",
   "scripts/context/query.py": "c35d95db9c2cc3ec80d5334754be6ea6486a1d7c7f80abafe32402c4992e50b3",
   "scripts/guardpin.py": "2912a5be476c1992224ae38d661fa384710c2b41021ccb81eea60e0a329910b4",
   "scripts/mutate": "c993b1267a34451cacbc296407a15eebedc5554dafe875968707573e3de304a4",
@@ -39,6 +40,7 @@
   "tests/fitness/test_import_boundaries.py": "7c7530cfd2b9c3289f3be6708d442c95a057ec8adfc4371dceac040019f6f5bb",
   "tests/fitness/test_mutation_config.py": "56f32530065eee8af89339b5888ad1773b387c38e179e20155f57c45b579d712",
   "tests/fitness/test_profile.py": "7831682b50465f2ffd67e94ed1d5324e7efde4bcd961ac83788b6097a9f08429",
+  "tests/fitness/test_spine.py": "a6e0b56194804df5c36c284652d8cb4033cd4009f18a7f896e37a399b893b807",
   "tests/fitness/test_stop_hook.py": "f9896dd039ebabedc1b17f0e3d7cffc82c2c15da05404e4fb2c0c75b81f6dd23",
   "tests/fitness/test_tools.py": "65957d849165c10a780c09f8a33685fd46df4e404e396d5c739768b919fa03b2"
 }

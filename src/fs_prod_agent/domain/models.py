@@ -34,7 +34,6 @@ class Mandate(BaseModel):
     mandate_id: str
     name: str
     ranges: dict[str, tuple[float, float]] = Field(default_factory=dict)
-    exclusions: list[str] = Field(default_factory=list)
 
 
 class PortfolioSnapshot(BaseModel):
@@ -44,24 +43,6 @@ class PortfolioSnapshot(BaseModel):
     holdings: dict[str, float] = Field(default_factory=dict)
     portfolio_return: float | None = None
     benchmark_return: float | None = None
-
-
-class Manager(BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-    manager_id: str
-    name: str
-    strategy: str
-    on_watchlist: bool = False
-
-
-class Proposal(BaseModel):
-    model_config = ConfigDict(frozen=True)
-
-    proposal_id: str
-    kind: str
-    effect: Effect
-    tool_name: str
 
 
 class Briefing(BaseModel):

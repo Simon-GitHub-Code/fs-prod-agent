@@ -9,6 +9,9 @@ from fs_prod_agent.workflows.mandate_check import (
     EVAL_SUITE as MANDATE_EVAL,
 )
 from fs_prod_agent.workflows.mandate_check import (
+    FOLLOW_UP as MANDATE_FOLLOW_UP,
+)
+from fs_prod_agent.workflows.mandate_check import (
     STEPS as MANDATE_STEPS,
 )
 from fs_prod_agent.workflows.mandate_check import (
@@ -38,6 +41,7 @@ class WorkflowSpec(BaseModel):
     tool_names: tuple[str, ...]
     eval_suite: str
     steps: tuple[str, ...]
+    follow_up: str | None = None
 
 
 class AgentSpec(BaseModel):
@@ -52,7 +56,13 @@ class AgentSpec(BaseModel):
 def workflows() -> list[WorkflowSpec]:
     return [
         WorkflowSpec(id=PACK_ID, tool_names=PACK_TOOLS, eval_suite=PACK_EVAL, steps=PACK_STEPS),
-        WorkflowSpec(id=MANDATE_ID, tool_names=MANDATE_TOOLS, eval_suite=MANDATE_EVAL, steps=MANDATE_STEPS),
+        WorkflowSpec(
+            id=MANDATE_ID,
+            tool_names=MANDATE_TOOLS,
+            eval_suite=MANDATE_EVAL,
+            steps=MANDATE_STEPS,
+            follow_up=MANDATE_FOLLOW_UP,
+        ),
     ]
 
 

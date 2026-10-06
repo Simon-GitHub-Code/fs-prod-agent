@@ -1,22 +1,20 @@
 """In-memory adapters for the local profile. No network and no AWS SDK."""
 
+from dataclasses import dataclass
 from pathlib import Path
 
 from fs_prod_agent.adapters.local.books import IPS, QUARTERLY_SNAPSHOT
+from fs_prod_agent.application.registry import workflow_by_id
 from fs_prod_agent.application.state import AgentState
 from fs_prod_agent.decisions.contract import Answer, DecisionResult
 from fs_prod_agent.decisions.v1.route import INGRESS_QUESTIONS
 from fs_prod_agent.decisions.v1.tool_gate import TOOL_GATE_QUESTIONS
-from fs_prod_agent.domain.models import Principal, RangeBreach, Role
+from fs_prod_agent.domain.models import Briefing, Mandate, PortfolioSnapshot, Principal, RangeBreach, Role
 from fs_prod_agent.domain.oversight import performance_briefing, range_breaches
 from fs_prod_agent.mcp_servers.catalog import manifest_for
 from fs_prod_agent.observe.decision_chain import TraceRecord
 from fs_prod_agent.observe.review import ReviewItem
 from fs_prod_agent.policy.memory_rules import may_remember
-from fs_prod_agent.workflows.mandate_check import STEPS as MANDATE_STEPS
-from fs_prod_agent.workflows.mandate_check import WORKFLOW_ID as MANDATE_ID
-from fs_prod_agent.workflows.performance_pack import STEPS as PACK_STEPS
-from fs_prod_agent.workflows.performance_pack import WORKFLOW_ID as PACK_ID
 
 _ROUTE_KEYS = set(INGRESS_QUESTIONS[0].criteria)  # type: ignore[arg-type]
 _WORKFLOW_KEYS = set(INGRESS_QUESTIONS[1].criteria)  # type: ignore[arg-type]
@@ -105,11 +103,6 @@ class FixtureDecision:
         return _ingress("agent", "none", 1.0, 0.1, 0.9)
 
 
-class ScriptedModel:
-    def complete(self, prompt: str) -> str:
-        return "scripted"
-
-
 class InMemoryMemory:
     def __init__(self) -> None:
         self.sessions: dict[tuple[str, str], list[str]] = {}
@@ -181,18 +174,56 @@ class JsonlTrace:
         return list(self._records)
 
 
+@dataclass
+class _Step:
+    snapshot: PortfolioSnapshot | None = None
+    mandate: Mandate | None = None
+    briefing: Briefing | None = None
+    text: str = ""
+
+
+def _load_holdings(step: _Step) -> None:
+    step.snapshot = QUARTERLY_SNAPSHOT
+
+
+def _load_mandate(step: _Step) -> None:
+    step.mandate = IPS
+
+
+def _compute_return_versus_benchmark(step: _Step) -> None:
+    if step.snapshot is None:
+        raise ValueError("holdings are not loaded")
+    step.briefing = performance_briefing(step.snapshot)
+
+
+def _render_briefing(step: _Step) -> None:
+    if step.briefing is None:
+        raise ValueError("the briefing is not computed")
+    step.text = step.briefing.body
+
+
+def _compute_range_breaches(step: _Step) -> None:
+    if step.snapshot is None or step.mandate is None:
+        raise ValueError("holdings and the mandate are not loaded")
+    step.text = _render_breaches(range_breaches(step.snapshot.holdings, step.mandate.ranges))
+
+
+STEP_TABLE = {
+    "load_holdings": _load_holdings,
+    "load_mandate": _load_mandate,
+    "compute_return_versus_benchmark": _compute_return_versus_benchmark,
+    "render_briefing": _render_briefing,
+    "compute_range_breaches": _compute_range_breaches,
+}
+
+
 class FixtureWorkflowRunner:
     def run(self, workflow_id: str, state: AgentState) -> str:
-        if workflow_id == PACK_ID:
-            briefing = performance_briefing(QUARTERLY_SNAPSHOT)
-            steps = ",".join(PACK_STEPS)
-            return f"performance_pack:{steps} {briefing.body}"
-        if workflow_id == MANDATE_ID:
-            breaches = range_breaches(QUARTERLY_SNAPSHOT.holdings, IPS.ranges)
-            rendered = _render_breaches(breaches)
-            steps = ",".join(MANDATE_STEPS)
-            return f"mandate_check:{steps} breaches={rendered}"
-        raise KeyError(workflow_id)
+        spec = workflow_by_id(workflow_id)
+        step = _Step()
+        for name in spec.steps:
+            STEP_TABLE[name](step)
+        return step.text
 
 
 class FixtureAgentRunner:

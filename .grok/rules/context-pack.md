@@ -21,25 +21,25 @@ Rows here are functions within 4 of the cap, or past it.
 | --- | --- | --- |
 | -8 | 18 | decisions/contract.py::validate_decision |
 | -6 | 16 | policy/authorize.py::authorize |
-| 1 | 9 | application/pipeline.py::run |
 | 2 | 8 | adapters/local/fakes.py::evaluate |
 | 3 | 7 | application/pipeline.py::_stopped_outcome |
+| 3 | 7 | application/pipeline.py::run |
 | 4 | 6 | adapters/local/fakes.py::_choice |
-| 4 | 6 | application/router.py::dispatch_route |
 | 4 | 6 | policy/authorize.py::_route_signal |
 | 4 | 6 | policy/authorize.py::admit |
 
 ## Files
 
-- `imports.csv` — 92 production import edges.
-- `hotspots.csv` — 9 functions within 4 of the cap.
-- `guards.csv` — 12 fitness modules.
+- `imports.csv` — 90 production import edges.
+- `hotspots.csv` — 8 functions within 4 of the cap.
+- `guards.csv` — 13 fitness modules.
 
 ## Layers
 
 adapters, agents, application, composition, decisions, domain, evals, mcp_servers, observe, policy, ports, workflows
 
 Boundary collectors report clean.
+Spine collectors report clean.
 
 ## hotspots.csv
 
@@ -47,8 +47,7 @@ path,symbol,cc,cap,headroom
 adapters/local/fakes.py,_choice,6,10,4
 adapters/local/fakes.py,evaluate,8,10,2
 application/pipeline.py,_stopped_outcome,7,10,3
-application/pipeline.py,run,9,10,1
-application/router.py,dispatch_route,6,10,4
+application/pipeline.py,run,7,10,3
 decisions/contract.py,validate_decision,18,10,-8
 policy/authorize.py,_route_signal,6,10,4
 policy/authorize.py,admit,6,10,4
@@ -67,6 +66,7 @@ tests/fitness/test_guard_integrity.py,Pinned tests and quality controls match th
 tests/fitness/test_import_boundaries.py,"Import boundaries, read from import statements. Comments and strings do not count.","test_core_packages_stay_inside_the_decision_layer,test_policy_and_decisions_do_not_import_io_ports,test_application_does_not_import_adapters_or_frameworks,test_only_composition_imports_adapters,test_aws_adapter_import_is_only_the_aws_branch,test_third_party_sdks_have_one_import_site,test_mcp_servers_do_not_import_application_or_agents,test_evals_and_observe_do_not_import_the_decision_port,test_decisions_do_not_import_eval_metrics,test_domain_and_workflows_do_not_call_the_decider,test_a_domain_file_that_imports_an_adapter_is_rejected,test_a_clean_domain_file_is_not_rejected,test_a_module_level_aws_import_sits_outside_the_aws_branch"
 tests/fitness/test_mutation_config.py,The mutation run stays pointed at the decision modules and the unit tests that exercise them.,"test_mutmut_paths_are_the_decision_modules,test_ci_runs_the_mutation_gate,test_mutation_gate_rejects_a_survivor_and_a_line_no_test_runs,test_mutation_gate_rejects_an_empty_run,test_a_type_checker_catch_counts_as_killed"
 tests/fitness/test_profile.py,The local profile is the one that runs. The AWS profile is the unused switch.,"test_declared_dependencies_exclude_the_aws_sdk,test_local_profile_does_not_import_the_aws_sdk,test_aws_profile_raises_without_importing_the_aws_sdk,test_unknown_profile_is_rejected_and_local_is_the_default"
+tests/fitness/test_spine.py,"One dispatcher starts a runner. Ports, domain fields, and workflow steps stay in use.","test_the_live_spine_is_one_route_branch,test_a_second_dispatcher_is_rejected,test_a_workflow_id_literal_in_application_code_is_rejected,test_an_unused_protocol_is_rejected,test_an_unread_services_field_is_rejected,test_an_object_collaborator_is_rejected,test_an_unused_domain_type_is_rejected,test_an_unread_domain_field_is_rejected,test_a_step_missing_from_the_table_is_rejected,test_a_runner_that_pastes_step_names_is_rejected,test_the_layer_report_names_a_clean_spine"
 tests/fitness/test_stop_hook.py,The stop hook blocks a red suite and stays quiet for a session-end fire.,"test_a_red_suite_blocks_the_turn,test_a_green_suite_allows_the_turn,test_session_end_does_not_run_as_a_gate"
 tests/fitness/test_tools.py,Tools are manifest names. Agents and workflows do not carry tool functions.,"test_spec_tool_names_are_a_subset_of_manifests,test_agents_and_workflows_have_no_tool_decorators,test_manifests_have_no_trading_or_payment_words,test_an_order_tool_is_rejected"
 
@@ -76,7 +76,9 @@ path,imports
 adapters/aws/profile.py,typing
 adapters/local/books.py,fs_prod_agent.domain.models
 adapters/local/decision_fixture.py,fs_prod_agent.adapters.local.fakes
+adapters/local/fakes.py,dataclasses
 adapters/local/fakes.py,fs_prod_agent.adapters.local.books
+adapters/local/fakes.py,fs_prod_agent.application.registry
 adapters/local/fakes.py,fs_prod_agent.application.state
 adapters/local/fakes.py,fs_prod_agent.decisions.contract
 adapters/local/fakes.py,fs_prod_agent.decisions.v1.route
@@ -87,13 +89,12 @@ adapters/local/fakes.py,fs_prod_agent.mcp_servers.catalog
 adapters/local/fakes.py,fs_prod_agent.observe.decision_chain
 adapters/local/fakes.py,fs_prod_agent.observe.review
 adapters/local/fakes.py,fs_prod_agent.policy.memory_rules
-adapters/local/fakes.py,fs_prod_agent.workflows.mandate_check
-adapters/local/fakes.py,fs_prod_agent.workflows.performance_pack
 adapters/local/fakes.py,pathlib
 agents/__init__.py,fs_prod_agent.agents.oversight
 application/__init__.py,fs_prod_agent.application.pipeline
 application/__init__.py,fs_prod_agent.application.state
 application/pipeline.py,dataclasses
+application/pipeline.py,fs_prod_agent.application.registry
 application/pipeline.py,fs_prod_agent.application.state
 application/pipeline.py,fs_prod_agent.decisions.contract
 application/pipeline.py,fs_prod_agent.decisions.v1
@@ -105,10 +106,6 @@ application/registry.py,fs_prod_agent.agents.oversight
 application/registry.py,fs_prod_agent.workflows.mandate_check
 application/registry.py,fs_prod_agent.workflows.performance_pack
 application/registry.py,pydantic
-application/router.py,collections.abc
-application/router.py,fs_prod_agent.application.state
-application/router.py,fs_prod_agent.decisions.contract
-application/router.py,fs_prod_agent.ports.protocols
 application/state.py,fs_prod_agent.domain.models
 application/state.py,pydantic
 composition.py,dataclasses
@@ -117,6 +114,7 @@ composition.py,fs_prod_agent.adapters.local.fakes
 composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models
 composition.py,fs_prod_agent.observe.decision_chain
+composition.py,fs_prod_agent.ports.protocols
 decisions/__init__.py,fs_prod_agent.decisions.contract
 decisions/contract.py,pydantic
 decisions/contract.py,typing

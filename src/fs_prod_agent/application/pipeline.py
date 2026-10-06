@@ -2,14 +2,10 @@
 
 from dataclasses import dataclass
 
+from fs_prod_agent.application.registry import workflow_by_id
 from fs_prod_agent.application.state import AgentState, build_agent_state
 from fs_prod_agent.decisions.contract import DecisionResult, validate_decision
-from fs_prod_agent.decisions.v1 import (
-    CONTRACT_VERSION,
-    INGRESS_QUESTIONS,
-    MATERIALITY_QUESTIONS,
-    TOOL_GATE_QUESTIONS,
-)
+from fs_prod_agent.decisions.v1 import CONTRACT_VERSION, questions_for
 from fs_prod_agent.domain.models import Action, Principal
 from fs_prod_agent.observe.decision_chain import TraceRecord
 from fs_prod_agent.policy.authorize import Verdict, admit, authorize, overrode
@@ -19,7 +15,6 @@ from fs_prod_agent.ports.protocols import (
     GatewayPort,
     HumanReviewPort,
     MemoryPort,
-    ModelPort,
     RetrieverPort,
     TracePort,
     WorkflowRunner,
@@ -29,7 +24,6 @@ from fs_prod_agent.ports.protocols import (
 @dataclass
 class Services:
     decision: DecisionPort
-    model: ModelPort
     memory: MemoryPort
     gateway: GatewayPort
     retriever: RetrieverPort
@@ -47,17 +41,13 @@ class Pipeline:
         self.services.memory.append_turn(principal.actor_id, session_id, request)
         evidence = self.services.retriever.retrieve(request)
         state = build_agent_state(request, evidence, None, principal)
-        decision = self._decide(state, "ingress", INGRESS_QUESTIONS)
+        decision = self._decide(state, "ingress", questions_for("ingress"))
         verdict = admit(decision)
         route, workflow_id = _route_fields(decision)
         answers = list(decision.answers.values())
         outcome = _stopped_outcome(verdict, route)
-        if verdict is Verdict.approve and route == "workflow" and workflow_id is not None:
-            outcome = self.services.workflow.run(workflow_id, state)
-            if workflow_id == "mandate_check":
-                follow_state = build_agent_state(request, evidence, None, principal, outcome)
-                follow = self._decide(follow_state, "materiality", MATERIALITY_QUESTIONS)
-                answers.extend(follow.answers.values())
+        if verdict is Verdict.approve and route == "workflow":
+            outcome = self._run_workflow(workflow_id, request, evidence, principal, answers)
         elif verdict is Verdict.approve and route == "agent":
             outcome = self.services.agent.run(state)
         elif verdict is Verdict.review:
@@ -87,7 +77,7 @@ class Pipeline:
     ) -> TraceRecord:
         evidence = self.services.retriever.retrieve(request)
         state = build_agent_state(request, evidence, action, principal)
-        decision = self._decide(state, "tool_gate", TOOL_GATE_QUESTIONS)
+        decision = self._decide(state, "tool_gate", questions_for("tool_gate"))
         verdict = authorize(principal, action, decision)
         tool_name: str | None = None
         if verdict is Verdict.approve:
@@ -154,6 +144,26 @@ class Pipeline:
         )
         self.services.trace.record(trace)
         return trace
+
+    def _run_workflow(
+        self,
+        workflow_id: str | None,
+        request: str,
+        evidence: list[str],
+        principal: Principal,
+        answers: list,
+    ) -> str:
+        if workflow_id is None:
+            raise ValueError("workflow route missing workflow_id")
+        spec = workflow_by_id(workflow_id)
+        state = build_agent_state(request, evidence, None, principal)
+        outcome = self.services.workflow.run(workflow_id, state)
+        if spec.follow_up is None:
+            return outcome
+        follow_state = build_agent_state(request, evidence, None, principal, outcome)
+        follow = self._decide(follow_state, spec.follow_up, questions_for(spec.follow_up))
+        answers.extend(follow.answers.values())
+        return outcome
 
 
 def _route_fields(decision: DecisionResult) -> tuple[str | None, str | None]:

@@ -5,8 +5,10 @@ Hexagonal decision pipeline for an investment oversight desk. The system drafts 
 The fitness suite is the authority for this shape. Unit tests check one module. Integration tests run `build("local")`. The agent contract is [AGENTS.md](AGENTS.md).
 
 ```
-context → reason → decide → authorize → execute → observe → evaluate
+context → decide → authorize → execute → observe → evaluate
 ```
+
+`Pipeline.run` is the only route branch. A workflow spec names any follow-up contract, and the steps on that spec are functions the local runner calls. The agent runner returns the answer.
 
 `build("local")` wires in-memory adapters and is the profile this repository runs. `build("aws")` returns the same `App` type and raises `AwsProfileUnavailable` until an account exists. Only `composition.py` imports adapters.
 

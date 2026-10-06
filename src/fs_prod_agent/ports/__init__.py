@@ -5,9 +5,7 @@ from fs_prod_agent.ports.protocols import (
     HumanReviewPort,
     IdentityPort,
     MemoryPort,
-    ModelPort,
     RetrieverPort,
-    RuntimePort,
     TracePort,
     WorkflowRunner,
 )
@@ -19,9 +17,7 @@ __all__ = [
     "HumanReviewPort",
     "IdentityPort",
     "MemoryPort",
-    "ModelPort",
     "RetrieverPort",
-    "RuntimePort",
     "TracePort",
     "WorkflowRunner",
 ]

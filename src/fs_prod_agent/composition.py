@@ -3,24 +3,23 @@
 from dataclasses import dataclass
 
 from fs_prod_agent.application.pipeline import Pipeline, Services
-from fs_prod_agent.domain.models import Principal
+from fs_prod_agent.domain.models import Action, Effect
 from fs_prod_agent.observe.decision_chain import TraceRecord
+from fs_prod_agent.ports.protocols import HumanReviewPort, IdentityPort, MemoryPort, TracePort
 
 
 @dataclass
 class App:
     profile: str
     pipeline: Pipeline
-    memory: object
-    human_review: object
-    trace: object
-    identity: object
+    memory: MemoryPort
+    human_review: HumanReviewPort
+    trace: TracePort
+    identity: IdentityPort
 
     def invoke(self, payload: dict[str, str], session_id: str) -> TraceRecord:
-        from fs_prod_agent.domain.models import Action, Effect
-
         actor_id = payload["actor_id"]
-        principal: Principal = self.identity.principal(actor_id)  # type: ignore[attr-defined]
+        principal = self.identity.principal(actor_id)
         request = payload["request"]
         if "tool_name" in payload:
             action = Action(tool_name=payload["tool_name"], effect=Effect(payload["effect"]))
@@ -48,7 +47,6 @@ def _build_local() -> App:
         InMemoryReview,
         JsonlTrace,
         LocalGateway,
-        ScriptedModel,
         StaticRetriever,
         default_principal,
     )
@@ -61,7 +59,6 @@ def _build_local() -> App:
     pipeline = Pipeline(
         Services(
             decision=FixtureDecision(),
-            model=ScriptedModel(),
             memory=memory,
             gateway=LocalGateway(),
             retriever=StaticRetriever(),

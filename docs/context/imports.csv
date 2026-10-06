@@ -2,7 +2,9 @@ path,imports
 adapters/aws/profile.py,typing
 adapters/local/books.py,fs_prod_agent.domain.models
 adapters/local/decision_fixture.py,fs_prod_agent.adapters.local.fakes
+adapters/local/fakes.py,dataclasses
 adapters/local/fakes.py,fs_prod_agent.adapters.local.books
+adapters/local/fakes.py,fs_prod_agent.application.registry
 adapters/local/fakes.py,fs_prod_agent.application.state
 adapters/local/fakes.py,fs_prod_agent.decisions.contract
 adapters/local/fakes.py,fs_prod_agent.decisions.v1.route
@@ -13,13 +15,12 @@ adapters/local/fakes.py,fs_prod_agent.mcp_servers.catalog
 adapters/local/fakes.py,fs_prod_agent.observe.decision_chain
 adapters/local/fakes.py,fs_prod_agent.observe.review
 adapters/local/fakes.py,fs_prod_agent.policy.memory_rules
-adapters/local/fakes.py,fs_prod_agent.workflows.mandate_check
-adapters/local/fakes.py,fs_prod_agent.workflows.performance_pack
 adapters/local/fakes.py,pathlib
 agents/__init__.py,fs_prod_agent.agents.oversight
 application/__init__.py,fs_prod_agent.application.pipeline
 application/__init__.py,fs_prod_agent.application.state
 application/pipeline.py,dataclasses
+application/pipeline.py,fs_prod_agent.application.registry
 application/pipeline.py,fs_prod_agent.application.state
 application/pipeline.py,fs_prod_agent.decisions.contract
 application/pipeline.py,fs_prod_agent.decisions.v1
@@ -31,10 +32,6 @@ application/registry.py,fs_prod_agent.agents.oversight
 application/registry.py,fs_prod_agent.workflows.mandate_check
 application/registry.py,fs_prod_agent.workflows.performance_pack
 application/registry.py,pydantic
-application/router.py,collections.abc
-application/router.py,fs_prod_agent.application.state
-application/router.py,fs_prod_agent.decisions.contract
-application/router.py,fs_prod_agent.ports.protocols
 application/state.py,fs_prod_agent.domain.models
 application/state.py,pydantic
 composition.py,dataclasses
@@ -43,6 +40,7 @@ composition.py,fs_prod_agent.adapters.local.fakes
 composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models
 composition.py,fs_prod_agent.observe.decision_chain
+composition.py,fs_prod_agent.ports.protocols
 decisions/__init__.py,fs_prod_agent.decisions.contract
 decisions/contract.py,pydantic
 decisions/contract.py,typing

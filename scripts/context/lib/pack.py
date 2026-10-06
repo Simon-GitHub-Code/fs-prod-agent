@@ -9,6 +9,7 @@ from scripts.context.lib.complexity import CAP, function_scores
 from scripts.context.lib.guards import guard_rows
 from scripts.context.lib.imports import absolute_imports, imported_modules, module_name, python_files
 from scripts.context.lib.paths import PACK_DIR, REPO, RULES_PACK, SRC
+from scripts.context.lib.spine import all_spine, spine_touching
 
 MARGIN = 4
 IMPORTS = "imports.csv"
@@ -178,6 +179,9 @@ def _production_lines(path: Path) -> list[str]:
     lines.append("boundary:")
     hits = violations_touching(path)
     lines.extend([f"  {item}" for item in hits] or ["  clean"])
+    lines.append("spine:")
+    spine_hits = spine_touching(path)
+    lines.extend([f"  {item}" for item in spine_hits] or ["  clean"])
     return lines
 
 
@@ -194,6 +198,8 @@ def _index(
     layers = sorted({layer_of(path) for path, _module in imports})
     violations = all_violations()
     boundary = "clean" if not violations else f"{len(violations)} violation(s)"
+    spine_hits = all_spine()
+    spine = "clean" if not spine_hits else f"{len(spine_hits)} violation(s)"
     lines = [
         "# Context pack",
         "",
@@ -222,6 +228,7 @@ def _index(
         ", ".join(layers) if layers else "none",
         "",
         f"Boundary collectors report {boundary}.",
+        f"Spine collectors report {spine}.",
         "",
     ]
     return "\n".join(lines)

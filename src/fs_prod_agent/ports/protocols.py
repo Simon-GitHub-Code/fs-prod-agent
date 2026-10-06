@@ -16,10 +16,6 @@ class DecisionPort(Protocol):
     def evaluate(self, state: AgentState, contract: str) -> DecisionResult: ...
 
 
-class ModelPort(Protocol):
-    def complete(self, prompt: str) -> str: ...
-
-
 class MemoryPort(Protocol):
     def append_turn(self, actor_id: str, session_id: str, text: str) -> None: ...
 
@@ -40,10 +36,6 @@ class IdentityPort(Protocol):
 
 class RetrieverPort(Protocol):
     def retrieve(self, request: str) -> list[str]: ...
-
-
-class RuntimePort(Protocol):
-    def invoke(self, payload: dict[str, str], session_id: str) -> TraceRecord: ...
 
 
 class TracePort(Protocol):

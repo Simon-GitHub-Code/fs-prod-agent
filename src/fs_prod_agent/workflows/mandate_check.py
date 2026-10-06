@@ -2,6 +2,7 @@
 
 WORKFLOW_ID = "mandate_check"
 EVAL_SUITE = "mandate_check"
+FOLLOW_UP = "materiality"
 TOOL_NAMES = ("get_holdings", "search_policy")
 STEPS = (
     "load_holdings",
