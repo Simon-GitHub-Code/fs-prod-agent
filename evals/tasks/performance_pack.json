@@ -1,0 +1,19 @@
+{
+  "id": "performance_pack",
+  "stage": "ingress",
+  "request": "Prepare the quarterly total-fund pack against the SAA.",
+  "actor_id": "analyst-1",
+  "role": "analyst",
+  "scopes": [
+    "search_policy",
+    "get_holdings",
+    "get_manager_report",
+    "draft_briefing",
+    "submit_committee_paper"
+  ],
+  "expected": {
+    "verdict": "approve",
+    "route": "workflow",
+    "workflow_id": "performance_pack"
+  }
+}

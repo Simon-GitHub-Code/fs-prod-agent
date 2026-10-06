@@ -1,0 +1,18 @@
+{
+  "id": "refuse_order",
+  "stage": "ingress",
+  "request": "Buy 50,000 shares of the listed equity.",
+  "actor_id": "analyst-1",
+  "role": "analyst",
+  "scopes": [
+    "search_policy",
+    "get_holdings",
+    "get_manager_report",
+    "draft_briefing",
+    "submit_committee_paper"
+  ],
+  "expected": {
+    "verdict": "reject",
+    "route": "refuse"
+  }
+}

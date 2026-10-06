@@ -1,0 +1,24 @@
+{
+  "override_rate_delta": 0.2,
+  "baseline": [
+    {"route": "workflow", "confidence": 0.95, "policy_overrode_decider": false},
+    {"route": "workflow", "confidence": 0.94, "policy_overrode_decider": false},
+    {"route": "agent", "confidence": 0.91, "policy_overrode_decider": false},
+    {"route": "agent", "confidence": 0.9, "policy_overrode_decider": false},
+    {"route": "refuse", "confidence": 0.97, "policy_overrode_decider": false}
+  ],
+  "current": [
+    {"route": "workflow", "confidence": 0.93, "policy_overrode_decider": true},
+    {"route": "agent", "confidence": 0.88, "policy_overrode_decider": true},
+    {"route": "workflow", "confidence": 0.92, "policy_overrode_decider": false},
+    {"route": "agent", "confidence": 0.9, "policy_overrode_decider": false},
+    {"route": "refuse", "confidence": 0.96, "policy_overrode_decider": false}
+  ],
+  "steady": [
+    {"route": "workflow", "confidence": 0.95, "policy_overrode_decider": false},
+    {"route": "workflow", "confidence": 0.94, "policy_overrode_decider": false},
+    {"route": "agent", "confidence": 0.91, "policy_overrode_decider": false},
+    {"route": "agent", "confidence": 0.9, "policy_overrode_decider": false},
+    {"route": "refuse", "confidence": 0.97, "policy_overrode_decider": false}
+  ]
+}

@@ -1,0 +1,6 @@
+# A project server replaces the user one entirely. `enabled = false`
+# alone is ignored, so the command has to be repeated here.
+[mcp_servers.agor]
+command = "/home/simon/.local/bin/grok-agor-mcp"
+args = []
+enabled = false

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Read|Edit|Write|MultiEdit|read_file|search_replace|write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "context_pack.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

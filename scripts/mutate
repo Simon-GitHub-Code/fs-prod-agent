@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Mutation gate. CI runs this command. It is not part of scripts/verify.
+# mutmut keeps a cached verdict when only the tests change, so a weakened
+# test would stay green. Wipe the cache on every run.
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+if ! command -v uv >/dev/null 2>&1; then
+  echo "uv is required. https://docs.astral.sh/uv/" >&2
+  exit 1
+fi
+rm -rf mutants
+uv run --frozen mutmut run
+uv run --frozen python scripts/mutate_status.py

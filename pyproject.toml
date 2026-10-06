@@ -1,0 +1,55 @@
+[project]
+name = "fs-prod-agent"
+version = "0.1.0"
+description = "Local investment-oversight agent with AWS-shaped ports."
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2"]
+
+[dependency-groups]
+dev = [
+    "mutmut>=3.2",
+    "pre-commit>=4",
+    "pytest>=8",
+    "ruff==0.15.10",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".venv", "src/*.egg-info"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# str(Enum member) is "Verdict.approve". StrEnum would make it "approve".
+ignore = ["UP042"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["fs_prod_agent", "scripts", "tests"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mutmut]
+source_paths = ["src/fs_prod_agent"]
+only_mutate = [
+    "src/fs_prod_agent/domain/oversight.py",
+    "src/fs_prod_agent/policy/authorize.py",
+    "src/fs_prod_agent/decisions/contract.py",
+]
+pytest_add_cli_args_test_selection = [
+    "tests/unit/test_oversight.py",
+    "tests/unit/test_policy.py",
+    "tests/unit/test_decision_contracts.py",
+]
+also_copy = ["scripts", "evals"]

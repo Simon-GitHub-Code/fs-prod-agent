@@ -1,0 +1,21 @@
+# Pinned tests and quality controls.
+#
+# On this solo repo GitHub does not count a self-approval, so this file routes
+# the diff and does not by itself block a merge. The block is the hash pin in
+# tests/fitness/test_guard_integrity.py, the ask in .grok/hooks/approval.py,
+# and the fitness check on the pull request.
+
+/tests/fitness/                        @Simon-GitHub-Code
+/scripts/context/                      @Simon-GitHub-Code
+/.grok/hooks/                          @Simon-GitHub-Code
+/.github/CODEOWNERS                    @Simon-GitHub-Code
+/.github/workflows/fitness.yml         @Simon-GitHub-Code
+/.pre-commit-config.yaml               @Simon-GitHub-Code
+/AGENTS.md                             @Simon-GitHub-Code
+/pyproject.toml                        @Simon-GitHub-Code
+/scripts/bless                         @Simon-GitHub-Code
+/scripts/guardpin.py                   @Simon-GitHub-Code
+/scripts/mutate                        @Simon-GitHub-Code
+/scripts/mutate_status.py              @Simon-GitHub-Code
+/scripts/secrets                       @Simon-GitHub-Code
+/scripts/verify                        @Simon-GitHub-Code

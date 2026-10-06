@@ -1,0 +1,77 @@
+[
+  {
+    "id": "route",
+    "version": "v1",
+    "type": "choice",
+    "instructions": "Which execution path should handle this request?",
+    "criteria": {
+      "workflow": "A known deterministic procedure can answer it.",
+      "agent": "The request needs open-ended retrieval and reasoning.",
+      "clarify": "The request is underspecified and a person should be asked.",
+      "refuse": "The request asks for an action this system does not perform."
+    }
+  },
+  {
+    "id": "workflow_id",
+    "version": "v1",
+    "type": "choice",
+    "instructions": "If a workflow applies, which one?",
+    "criteria": {
+      "performance_pack": "Quarterly total-fund performance against the strategic asset allocation.",
+      "mandate_check": "Holdings compared with investment policy ranges.",
+      "none": "No registered workflow applies."
+    }
+  },
+  {
+    "id": "materiality",
+    "version": "v1",
+    "type": "score",
+    "instructions": "How material is this request to the investment committee?",
+    "criteria": [
+      "informational, no committee attention",
+      "notable for the analyst file",
+      "belongs in the next committee pack",
+      "board-level exception or policy change"
+    ]
+  },
+  {
+    "id": "needs_human",
+    "version": "v1",
+    "type": "noul",
+    "instructions": "Does this request require a person to approve it before any further work?",
+    "criteria": null
+  },
+  {
+    "id": "tool_gate",
+    "version": "v1",
+    "type": "choice",
+    "instructions": "What should happen to this proposed tool call?",
+    "criteria": {
+      "proceed": "The call matches the request and is safe to attempt.",
+      "guide": "The call needs a correction before it runs.",
+      "confirm": "A person should confirm the call before it runs.",
+      "deny": "The call should not run."
+    }
+  },
+  {
+    "id": "arguments_grounded",
+    "version": "v1",
+    "type": "noul",
+    "instructions": "Are the tool arguments grounded in the request and the retrieved evidence?",
+    "criteria": null
+  },
+  {
+    "id": "required_info_missing",
+    "version": "v1",
+    "type": "noul",
+    "instructions": "Is information required by this tool still missing?",
+    "criteria": null
+  },
+  {
+    "id": "call_premature",
+    "version": "v1",
+    "type": "noul",
+    "instructions": "Is this tool call premature given the conversation so far?",
+    "criteria": null
+  }
+]

@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Record a deliberate change to a hash-pinned test or quality control.
+
+Name every path that moved, from the repository root, and say what the red
+suite was worth. --caught means the failure showed something not already
+decided. --routine means the change was deliberate and this is the record.
+One of the two is required. A path that moved and was not named is refused.
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from scripts.guardpin import (  # noqa: E402
+    BlessError,
+    UnnamedDriftError,
+    Verdict,
+    init_manifest,
+    record,
+    render_tally,
+    write_manifest,
+)
+
+REFUSED = 2
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("paths", nargs="*", help="repo-root paths this bless is allowed to move")
+    parser.add_argument("--note", default="", help="one clause on why the pin moved")
+    parser.add_argument("--report", action="store_true", help="print the caught/routine tally and write nothing")
+    parser.add_argument("--init", action="store_true", help="write the first manifest, only when none exists")
+    verdict = parser.add_mutually_exclusive_group()
+    verdict.add_argument("--caught", action="store_true", help="the red suite showed something new")
+    verdict.add_argument("--routine", action="store_true", help="the change was deliberate")
+    args = parser.parse_args(argv)
+    if args.report:
+        print(render_tally())
+        return 0
+    if args.init:
+        return _init(args.note)
+    if not (args.caught or args.routine):
+        print("Refused: pass --caught or --routine.", file=sys.stderr)
+        return REFUSED
+    if not args.paths:
+        print("Refused: name each path this bless is allowed to move.", file=sys.stderr)
+        return REFUSED
+    chosen = Verdict.caught if args.caught else Verdict.routine
+    try:
+        moved = write_manifest(args.paths)
+    except (UnnamedDriftError, BlessError) as refusal:
+        print(f"Refused: {refusal}", file=sys.stderr)
+        return REFUSED
+    record(chosen, moved, args.note)
+    print(f"Re-blessed {len(moved)} path(s) as {chosen.value}.")
+    for key in moved:
+        print(f"  moved: {key}")
+    return 0
+
+
+def _init(note: str) -> int:
+    try:
+        moved = init_manifest()
+    except BlessError as refusal:
+        print(f"Refused: {refusal}", file=sys.stderr)
+        return REFUSED
+    record(Verdict.routine, moved, note or "initial pin")
+    print(f"Pinned {len(moved)} path(s).")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

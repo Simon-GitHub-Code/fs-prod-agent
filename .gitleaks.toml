@@ -1,0 +1,8 @@
+# Hash pins are file digests. The path scripts/secrets sits next to a SHA-256
+# and matches the generic-api-key rule. This allowlist is that file only.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Guard manifest stores SHA-256 pins, not credentials"
+paths = ['''tests/fitness/_guard_manifest.json''']

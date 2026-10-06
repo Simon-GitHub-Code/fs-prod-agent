@@ -1,0 +1,18 @@
+{
+  "id": "oversight_analyst",
+  "stage": "ingress",
+  "request": "Why is Global Equity Manager B on watch, and what does the mandate allow?",
+  "actor_id": "analyst-1",
+  "role": "analyst",
+  "scopes": [
+    "search_policy",
+    "get_holdings",
+    "get_manager_report",
+    "draft_briefing",
+    "submit_committee_paper"
+  ],
+  "expected": {
+    "verdict": "approve",
+    "route": "agent"
+  }
+}

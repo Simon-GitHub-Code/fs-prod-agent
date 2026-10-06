@@ -1,0 +1,19 @@
+{
+  "id": "committee_paper",
+  "stage": "tool",
+  "request": "Submit the committee paper on Global Equity Manager B.",
+  "actor_id": "analyst-1",
+  "role": "analyst",
+  "scopes": [
+    "search_policy",
+    "get_holdings",
+    "get_manager_report",
+    "draft_briefing",
+    "submit_committee_paper"
+  ],
+  "tool_name": "submit_committee_paper",
+  "effect": "mutate",
+  "expected": {
+    "verdict": "review"
+  }
+}

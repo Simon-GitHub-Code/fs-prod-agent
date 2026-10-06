@@ -1,0 +1,10 @@
+path,symbol,cc,cap,headroom
+adapters/local/fakes.py,_choice,6,10,4
+adapters/local/fakes.py,evaluate,8,10,2
+application/pipeline.py,_stopped_outcome,7,10,3
+application/pipeline.py,run,9,10,1
+application/router.py,dispatch_route,6,10,4
+decisions/contract.py,validate_decision,18,10,-8
+policy/authorize.py,_route_signal,6,10,4
+policy/authorize.py,admit,6,10,4
+policy/authorize.py,authorize,16,10,-6
