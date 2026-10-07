@@ -9,7 +9,7 @@
 - `policy/` returns approve, review, reject, failed, or uncertain. A model signal does not grant permission.
 - `application/` runs the pipeline. It does not import adapters. Policy admits a route, and only an approved workflow or agent starts a runner.
 - `composition.py` is the only module that wires adapters. `build("local")` is the profile that runs. `build("aws")` stays unconfigured.
-- Tools are names on manifests in `mcp_servers/catalog.py`. The gateway is the only caller.
+- Tools are names on manifests in `mcp_servers/catalog.py`. The gateway is the only caller. `adapters/local/mcp_tools.py` serves them over MCP, and `adapters/local/gateway_mcp.py` is the gateway: in-process by default, or a Streamable HTTP URL.
 - Eval cases live in `/evals`. The loader is `fs_prod_agent.evals`. The routing suite is `evals/routing/v1/cases.jsonl`, scored by `fs_prod_agent.evals.score`.
 
 ## Gate

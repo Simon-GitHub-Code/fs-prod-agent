@@ -79,6 +79,7 @@ def open_agent(
     """A Strands agent bound to one file-backed session. Import happens here, not at build()."""
     from strands import Agent
     from strands.session.file_session_manager import FileSessionManager
+    from strands.tools.executors import SequentialToolExecutor
 
     store = FileSessionManager(session_id=session_id, storage_dir=str(storage_dir))
     return Agent(
@@ -86,6 +87,8 @@ def open_agent(
         tools=_gateway_tools(gateway),
         hooks=[_ToolGate(decision, review, principal, session_id)],
         session_manager=store,
+        # One call at a time, so the audit lists tools in the order the agent asked for them.
+        tool_executor=SequentialToolExecutor(),
         callback_handler=None,
         system_prompt=SYSTEM_PROMPT,
     )

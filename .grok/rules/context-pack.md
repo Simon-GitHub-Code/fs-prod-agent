@@ -32,7 +32,7 @@ Rows here are functions within 4 of the cap, or past it.
 
 ## Files
 
-- `imports.csv` — 157 production import edges.
+- `imports.csv` — 170 production import edges.
 - `hotspots.csv` — 10 functions within 4 of the cap.
 - `guards.csv` — 9 fitness modules.
 
@@ -89,6 +89,7 @@ adapters/local/agent_strands.py,strands.hooks
 adapters/local/agent_strands.py,strands.models.model
 adapters/local/agent_strands.py,strands.models.ollama
 adapters/local/agent_strands.py,strands.session.file_session_manager
+adapters/local/agent_strands.py,strands.tools.executors
 adapters/local/agent_strands.py,tempfile
 adapters/local/agent_strands.py,typing
 adapters/local/books.py,fs_prod_agent.domain.models
@@ -131,6 +132,16 @@ adapters/local/fakes.py,fs_prod_agent.observe.decision_chain
 adapters/local/fakes.py,fs_prod_agent.observe.review
 adapters/local/fakes.py,fs_prod_agent.policy.memory_rules
 adapters/local/fakes.py,pathlib
+adapters/local/gateway_mcp.py,asyncio
+adapters/local/gateway_mcp.py,fs_prod_agent.mcp_servers.catalog
+adapters/local/gateway_mcp.py,mcp.client
+adapters/local/gateway_mcp.py,mcp.server.mcpserver
+adapters/local/gateway_mcp.py,typing
+adapters/local/mcp_tools.py,collections.abc
+adapters/local/mcp_tools.py,fs_prod_agent.adapters.local.books
+adapters/local/mcp_tools.py,fs_prod_agent.mcp_servers.catalog
+adapters/local/mcp_tools.py,mcp.server.mcpserver
+adapters/local/mcp_tools.py,mcp_types
 adapters/local/workflow_langgraph.py,collections.abc
 adapters/local/workflow_langgraph.py,fs_prod_agent.adapters.local.books
 adapters/local/workflow_langgraph.py,fs_prod_agent.adapters.local.fakes
@@ -164,6 +175,8 @@ composition.py,fs_prod_agent.adapters.local.agent_strands
 composition.py,fs_prod_agent.adapters.local.decision_decider
 composition.py,fs_prod_agent.adapters.local.desk
 composition.py,fs_prod_agent.adapters.local.fakes
+composition.py,fs_prod_agent.adapters.local.gateway_mcp
+composition.py,fs_prod_agent.adapters.local.mcp_tools
 composition.py,fs_prod_agent.adapters.local.workflow_langgraph
 composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Serve the desk's tools over MCP Streamable HTTP on 127.0.0.1:8767/mcp. Point build("local",
+# tool_server="http://127.0.0.1:8767/mcp") at it, as a deployment would point at an AgentCore Gateway.
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+exec uv run --frozen python -c "from fs_prod_agent.adapters.local.mcp_tools import serve; serve()"

@@ -3,7 +3,8 @@
 build("local") is offline: a scripted agent model and the fixture decider. build("local", live_model=...)
 names an Ollama Cloud model for the agent, reads OLLAMA_API_KEY, and requires the served decider.
 live_decider=False keeps the fixture decisions under a live agent model, for a machine that cannot
-serve the decider.
+serve the decider. Tools are served over MCP: in-process by default, or by the Streamable HTTP server
+at tool_server, which is where an AgentCore Gateway URL would go.
 """
 
 import os
@@ -38,14 +39,19 @@ class LiveModelUnavailable(RuntimeError):
     """A live model was named and OLLAMA_API_KEY is not set."""
 
 
-def build(profile: str = "local", live_model: str | None = None, live_decider: bool = True) -> App:
+def build(
+    profile: str = "local",
+    live_model: str | None = None,
+    live_decider: bool = True,
+    tool_server: str | None = None,
+) -> App:
     if profile == "aws":
         from fs_prod_agent.adapters.aws.profile import build_aws
 
         return build_aws()
     if profile != "local":
         raise ValueError(f"unknown profile: {profile}")
-    return _build_local(live_model, live_decider)
+    return _build_local(live_model, live_decider, tool_server)
 
 
 def serve_desk(host: str = "127.0.0.1", port: int = 8766, live_model: str | None = None) -> None:
@@ -54,7 +60,7 @@ def serve_desk(host: str = "127.0.0.1", port: int = 8766, live_model: str | None
     serve(lambda: build("local", live_model), host, port)
 
 
-def _build_local(live_model: str | None, live_decider: bool) -> App:
+def _build_local(live_model: str | None, live_decider: bool, tool_server: str | None) -> App:
     from fs_prod_agent.adapters.local.agent_strands import OllamaCloud, StrandsAgentRunner
     from fs_prod_agent.adapters.local.decision_decider import LIVE_TIMEOUT_SECONDS, DeciderClient
     from fs_prod_agent.adapters.local.fakes import (
@@ -62,10 +68,11 @@ def _build_local(live_model: str | None, live_decider: bool) -> App:
         InMemoryMemory,
         InMemoryReview,
         JsonlTrace,
-        LocalGateway,
         StaticRetriever,
         default_principal,
     )
+    from fs_prod_agent.adapters.local.gateway_mcp import McpGateway
+    from fs_prod_agent.adapters.local.mcp_tools import build_server
     from fs_prod_agent.adapters.local.workflow_langgraph import LangGraphWorkflow
 
     principal = default_principal()
@@ -73,7 +80,7 @@ def _build_local(live_model: str | None, live_decider: bool) -> App:
     review = InMemoryReview()
     trace = JsonlTrace()
     identity = InMemoryIdentity({principal.actor_id: principal})
-    gateway = LocalGateway()
+    gateway = McpGateway(tool_server or build_server())
     model = None
     decision = DeciderClient()
     if live_model is not None:
