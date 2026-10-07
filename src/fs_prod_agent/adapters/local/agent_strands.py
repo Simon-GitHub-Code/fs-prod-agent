@@ -1,6 +1,10 @@
-"""Strands agent for the open manager question. Tools go through the gateway. No API key required."""
+"""Strands agent for the open manager question. Tools go through the gateway.
+
+The scripted model needs no API key and is the default. OllamaCloud names a hosted model instead.
+"""
 
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +18,20 @@ from fs_prod_agent.ports.protocols import DecisionPort, GatewayPort, HumanReview
 
 _READ_TOOLS = ("get_manager_report", "search_policy")
 _PIPELINE_SESSION = "oversight"
+OLLAMA_CLOUD_HOST = "https://ollama.com"
+SYSTEM_PROMPT = (
+    "You are the oversight analyst at a large asset owner. "
+    "Answer the question from the tool results only, and name the tools you used. "
+    "You draft and check. You do not place orders or send anything."
+)
+
+
+@dataclass(frozen=True)
+class OllamaCloud:
+    """A model served by Ollama Cloud. The key is read from the environment and never printed."""
+
+    model_id: str
+    api_key: str = field(repr=False)
 
 
 class StrandsAgentRunner:
@@ -25,11 +43,13 @@ class StrandsAgentRunner:
         decision: DecisionPort,
         review: HumanReviewPort,
         storage_dir: Path | None = None,
+        model: OllamaCloud | None = None,
     ) -> None:
         self.gateway = gateway
         self.decision = decision
         self.review = review
         self.storage_dir = storage_dir or _private_dir()
+        self.model = model
 
     def run(self, state: AgentState) -> str:
         agent = open_agent(
@@ -39,8 +59,12 @@ class StrandsAgentRunner:
             self.decision,
             self.review,
             state.principal,
+            self.model,
         )
-        return str(agent(state.request)).strip()
+        try:
+            return str(agent(state.request)).strip()
+        except Exception as error:  # a model outage is an outcome, and the trace must still be written
+            return f"failed: agent model error ({type(error).__name__}: {error})"
 
 
 def open_agent(
@@ -50,6 +74,7 @@ def open_agent(
     decision: DecisionPort,
     review: HumanReviewPort,
     principal: Principal,
+    model: OllamaCloud | None = None,
 ) -> Any:
     """A Strands agent bound to one file-backed session. Import happens here, not at build()."""
     from strands import Agent
@@ -57,12 +82,12 @@ def open_agent(
 
     store = FileSessionManager(session_id=session_id, storage_dir=str(storage_dir))
     return Agent(
-        model=_scripted_model(),
+        model=_model(model),
         tools=_gateway_tools(gateway),
         hooks=[_ToolGate(decision, review, principal, session_id)],
         session_manager=store,
         callback_handler=None,
-        system_prompt="Answer the oversight question with the tools that apply. Do not place an order.",
+        system_prompt=SYSTEM_PROMPT,
     )
 
 
@@ -70,6 +95,18 @@ def _private_dir() -> Path:
     import tempfile
 
     return Path(tempfile.mkdtemp(prefix="oversight-session-"))
+
+
+def _model(choice: OllamaCloud | None) -> Any:
+    if choice is None:
+        return _scripted_model()
+    from strands.models.ollama import OllamaModel
+
+    return OllamaModel(
+        host=OLLAMA_CLOUD_HOST,
+        ollama_client_args={"headers": {"Authorization": f"Bearer {choice.api_key}"}},
+        model_id=choice.model_id,
+    )
 
 
 def _scripted_model() -> Any:

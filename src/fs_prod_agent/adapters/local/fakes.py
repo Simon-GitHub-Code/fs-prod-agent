@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from fs_prod_agent.adapters.local.books import IPS, QUARTERLY_SNAPSHOT
+from fs_prod_agent.adapters.local.books import IPS, QUARTERLY_SNAPSHOT, holdings_text, manager_report, policy_text
 from fs_prod_agent.application.registry import workflow_by_id
 from fs_prod_agent.application.state import AgentState
 from fs_prod_agent.decisions.contract import Answer, DecisionResult
@@ -130,6 +130,12 @@ class LocalGateway:
     def call(self, tool_name: str, arguments: dict[str, str]) -> str:
         manifest_for(tool_name)
         self.calls.append(tool_name)
+        if tool_name == "get_manager_report":
+            return manager_report(arguments.get("query", ""))
+        if tool_name == "search_policy":
+            return policy_text()
+        if tool_name == "get_holdings":
+            return holdings_text()
         return f"{tool_name}:ok"
 
 

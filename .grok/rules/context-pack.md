@@ -31,7 +31,7 @@ Rows here are functions within 4 of the cap, or past it.
 
 ## Files
 
-- `imports.csv` — 144 production import edges.
+- `imports.csv` — 147 production import edges.
 - `hotspots.csv` — 9 functions within 4 of the cap.
 - `guards.csv` — 9 fitness modules.
 
@@ -72,6 +72,7 @@ tests/fitness/test_tools.py,Tools are manifest names. Agents and workflows do no
 
 path,imports
 adapters/aws/profile.py,typing
+adapters/local/agent_strands.py,dataclasses
 adapters/local/agent_strands.py,fs_prod_agent.application.state
 adapters/local/agent_strands.py,fs_prod_agent.decisions.contract
 adapters/local/agent_strands.py,fs_prod_agent.decisions.v1
@@ -84,6 +85,7 @@ adapters/local/agent_strands.py,pathlib
 adapters/local/agent_strands.py,strands
 adapters/local/agent_strands.py,strands.hooks
 adapters/local/agent_strands.py,strands.models.model
+adapters/local/agent_strands.py,strands.models.ollama
 adapters/local/agent_strands.py,strands.session.file_session_manager
 adapters/local/agent_strands.py,tempfile
 adapters/local/agent_strands.py,typing
@@ -165,6 +167,7 @@ composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models
 composition.py,fs_prod_agent.observe.decision_chain
 composition.py,fs_prod_agent.ports.protocols
+composition.py,os
 decisions/__init__.py,fs_prod_agent.decisions.contract
 decisions/contract.py,pydantic
 decisions/contract.py,typing

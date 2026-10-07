@@ -11,7 +11,7 @@
   ".pre-commit-config.yaml": "959dbae60aad5d1a301bfcb31ba7a6b831f138e37b0adcbb53695d7594c2c0bd",
   "AGENTS.md": "c61fcd8ae09d75f7a01e098be413e9e29e697b95ca14eddd83680c4a69d786d5",
   "CLAUDE.md": "73f922b48c4cd05459409f273d535ca7a517479b81b541a19353c4c7039d42b0",
-  "pyproject.toml": "5f2774a31568848db1cbd2587841f51687c7c466df3caf979c64f3d66cc2642a",
+  "pyproject.toml": "e3d06aec0863a9cc0212028d0ab8112eb7481583ae51c14afdcdba5a90fb4d94",
   "scripts/bless": "6b2ef6ca3779de385ce5b5ae51f63fc9a4438a19e3237d815019c11a33ab8162",
   "scripts/context/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "scripts/context/build.py": "b58993d9c7b9f38f76fbf9cdeb4131a10864ae50352d2d73514487c141e65f5d",

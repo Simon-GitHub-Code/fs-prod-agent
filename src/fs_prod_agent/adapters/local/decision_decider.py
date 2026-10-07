@@ -1,4 +1,8 @@
-"""Strands Decider client. One hobson checkpoint, served on localhost, or the fixture when it is down."""
+"""Strands Decider client. One hobson checkpoint, served on localhost.
+
+By default the fixture answers when nothing is listening. A live run turns that off: an offline
+decider or a malformed answer becomes an unavailable decision, and policy fails closed.
+"""
 
 import json
 import urllib.error
@@ -9,7 +13,7 @@ import strands_decider
 
 from fs_prod_agent.adapters.local.fakes import FixtureDecision
 from fs_prod_agent.application.state import AgentState
-from fs_prod_agent.decisions.contract import Answer, DecisionResult
+from fs_prod_agent.decisions.contract import Answer, DecisionResult, unavailable
 from fs_prod_agent.decisions.v1 import questions_for
 
 # The reference checkpoint published with strands-decider. Serve binds to localhost.
@@ -17,6 +21,8 @@ CHECKPOINT_ID = "StrandsAgents/strands-decider-2B-hobson-v19"
 SERVE_HOST = "127.0.0.1"
 SERVE_PORT = 8000
 _TIMEOUT_SECONDS = 0.4
+# A CPU-served 2B checkpoint answers in seconds, not milliseconds.
+LIVE_TIMEOUT_SECONDS = 60.0
 
 
 class DeciderOffline(Exception):
@@ -26,16 +32,29 @@ class DeciderOffline(Exception):
 class DeciderClient:
     """Posts v1 questions to the decider. A live answer replaces the fixture choice."""
 
-    def __init__(self, base_url: str | None = None, fallback: FixtureDecision | None = None) -> None:
+    def __init__(
+        self,
+        base_url: str | None = None,
+        fallback: FixtureDecision | None = None,
+        timeout: float = _TIMEOUT_SECONDS,
+        fixture_when_offline: bool = True,
+    ) -> None:
         self.base_url = base_url or f"http://{SERVE_HOST}:{SERVE_PORT}"
         self.fallback = fallback or FixtureDecision()
+        self.timeout = timeout
+        self.fixture_when_offline = fixture_when_offline
 
     def evaluate(self, state: AgentState, contract: str) -> DecisionResult:
         try:
-            payload = _read_json(_request(self.base_url, _body(state, contract)))
-        except DeciderOffline:
-            return self.fallback.evaluate(state, contract)
-        return _result_from(payload)
+            payload = _read_json(_request(self.base_url, _body(state, contract)), self.timeout)
+        except DeciderOffline as offline:
+            if self.fixture_when_offline:
+                return self.fallback.evaluate(state, contract)
+            return unavailable("v1", f"decider offline: {offline}")
+        try:
+            return _result_from(payload)
+        except (KeyError, TypeError, ValueError) as malformed:
+            return unavailable("v1", f"decider answer malformed: {malformed!r}")
 
 
 def serve_command() -> tuple[str, ...]:
@@ -60,9 +79,9 @@ def _request(base_url: str, body: dict[str, Any]) -> urllib.request.Request:
     )
 
 
-def _read_json(request: urllib.request.Request) -> dict[str, Any]:
+def _read_json(request: urllib.request.Request, timeout: float) -> dict[str, Any]:
     try:
-        with urllib.request.urlopen(request, timeout=_TIMEOUT_SECONDS) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.load(response)
     except urllib.error.HTTPError as exc:
         raise DeciderOffline(str(exc)) from exc

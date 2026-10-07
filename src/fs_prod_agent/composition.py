@@ -1,5 +1,12 @@
-"""The only module that wires adapters. local is the default. aws is the unused switch."""
+"""The only module that wires adapters. local is the default. aws is the unused switch.
 
+build("local") is offline: a scripted agent model and the fixture decider. build("local", live_model=...)
+names an Ollama Cloud model for the agent, reads OLLAMA_API_KEY, and requires the served decider.
+live_decider=False keeps the fixture decisions under a live agent model, for a machine that cannot
+serve the decider.
+"""
+
+import os
 from dataclasses import dataclass
 
 from fs_prod_agent.application.pipeline import Pipeline, Services
@@ -27,25 +34,29 @@ class App:
         return self.pipeline.run(request, principal, session_id)
 
 
-def build(profile: str = "local") -> App:
+class LiveModelUnavailable(RuntimeError):
+    """A live model was named and OLLAMA_API_KEY is not set."""
+
+
+def build(profile: str = "local", live_model: str | None = None, live_decider: bool = True) -> App:
     if profile == "aws":
         from fs_prod_agent.adapters.aws.profile import build_aws
 
         return build_aws()
     if profile != "local":
         raise ValueError(f"unknown profile: {profile}")
-    return _build_local()
+    return _build_local(live_model, live_decider)
 
 
-def serve_desk(host: str = "127.0.0.1", port: int = 8766) -> None:
+def serve_desk(host: str = "127.0.0.1", port: int = 8766, live_model: str | None = None) -> None:
     from fs_prod_agent.adapters.local.desk import serve
 
-    serve(build, host, port)
+    serve(lambda: build("local", live_model), host, port)
 
 
-def _build_local() -> App:
-    from fs_prod_agent.adapters.local.agent_strands import StrandsAgentRunner
-    from fs_prod_agent.adapters.local.decision_decider import DeciderClient
+def _build_local(live_model: str | None, live_decider: bool) -> App:
+    from fs_prod_agent.adapters.local.agent_strands import OllamaCloud, StrandsAgentRunner
+    from fs_prod_agent.adapters.local.decision_decider import LIVE_TIMEOUT_SECONDS, DeciderClient
     from fs_prod_agent.adapters.local.fakes import (
         InMemoryIdentity,
         InMemoryMemory,
@@ -63,7 +74,12 @@ def _build_local() -> App:
     trace = JsonlTrace()
     identity = InMemoryIdentity({principal.actor_id: principal})
     gateway = LocalGateway()
+    model = None
     decision = DeciderClient()
+    if live_model is not None:
+        model = OllamaCloud(model_id=live_model, api_key=_ollama_key())
+    if live_model is not None and live_decider:
+        decision = DeciderClient(timeout=LIVE_TIMEOUT_SECONDS, fixture_when_offline=False)
     pipeline = Pipeline(
         Services(
             decision=decision,
@@ -73,7 +89,7 @@ def _build_local() -> App:
             trace=trace,
             human_review=review,
             workflow=LangGraphWorkflow(),
-            agent=StrandsAgentRunner(gateway, decision, review),
+            agent=StrandsAgentRunner(gateway, decision, review, model=model),
         )
     )
     return App(
@@ -84,3 +100,10 @@ def _build_local() -> App:
         trace=trace,
         identity=identity,
     )
+
+
+def _ollama_key() -> str:
+    key = os.environ.get("OLLAMA_API_KEY", "")
+    if not key:
+        raise LiveModelUnavailable("a live model was named and OLLAMA_API_KEY is not set")
+    return key

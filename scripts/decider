@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Serve the strands-decider checkpoint on 127.0.0.1:8000 for live runs. Extra flags pass through,
+# e.g. --device cpu. The first run downloads the Qwen3.5-2B base weights (about 4.5 GB).
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+exec uv run --frozen python - "$@" <<'PY'
+import os
+import sys
+
+from fs_prod_agent.adapters.local.decision_decider import serve_command
+
+command = serve_command()
+os.execvp("uv", ["uv", "run", "--frozen", *command, *sys.argv[1:]])
+PY

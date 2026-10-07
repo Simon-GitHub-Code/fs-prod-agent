@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""Run the worked cases through the live stack and print each trace.
+
+The agent model is an Ollama Cloud model and needs OLLAMA_API_KEY. Decisions come from the served
+decider (scripts/decider) and fail closed when it is down. --fixture-decisions keeps the scripted
+decisions, for a machine that cannot serve the decider. This is not a test: it calls the network and
+costs tokens, so scripts/verify never runs it. It exits 1 when a verdict differs from the eval case.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import socket
+import sys
+import time
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if Path(sys.prefix).resolve() != (_ROOT / ".venv").resolve():
+    os.execvp("uv", ["uv", "run", "--frozen", "--project", str(_ROOT), "python", __file__, *sys.argv[1:]])
+sys.path[:0] = [str(_ROOT), str(_ROOT / "src")]
+
+from fs_prod_agent.adapters.local.decision_decider import SERVE_HOST, SERVE_PORT  # noqa: E402
+from fs_prod_agent.composition import build  # noqa: E402
+from fs_prod_agent.domain.models import Action  # noqa: E402
+from fs_prod_agent.evals.loader import EvalCase, load_cases  # noqa: E402
+
+_EVALS = _ROOT / "evals"
+_PREVIEW = 400
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--model", default="gpt-oss:120b", help="Ollama Cloud model id")
+    parser.add_argument("--fixture-decisions", action="store_true", help="keep scripted decisions")
+    args = parser.parse_args(argv)
+    if not os.environ.get("OLLAMA_API_KEY"):
+        print("OLLAMA_API_KEY is not set. Create a key at https://ollama.com/settings/keys and export it.")
+        return 2
+    live_decider = not args.fixture_decisions
+    if live_decider and not _listening():
+        print(f"No decider on {SERVE_HOST}:{SERVE_PORT}. Start scripts/decider, or pass --fixture-decisions.")
+        print("Without it every decision is unavailable and policy fails closed.\n")
+    decisions = "served decider" if live_decider else "fixture decisions"
+    print(f"agent model: {args.model} (Ollama Cloud) | decisions: {decisions}\n")
+    cases = [*load_cases(_EVALS / "tasks"), *load_cases(_EVALS / "decision_contracts" / "v1")]
+    misses = sum(not _run(case, args.model, live_decider) for case in cases)
+    print(f"{len(cases) - misses}/{len(cases)} verdicts match the eval cases.")
+    return 1 if misses else 0
+
+
+def _run(case: EvalCase, model: str, live_decider: bool) -> bool:
+    app = build("local", live_model=model, live_decider=live_decider)
+    started = time.monotonic()
+    if case.stage == "ingress":
+        trace = app.pipeline.run(case.request, case.principal, case.id)
+    else:
+        assert case.tool_name is not None and case.effect is not None
+        action = Action(tool_name=case.tool_name, effect=case.effect)
+        trace = app.pipeline.dispatch_tool(case.request, case.principal, action, case.id)
+    seconds = time.monotonic() - started
+    matched = trace.policy_verdict == case.expected_verdict
+    mark = "ok  " if matched else "MISS"
+    print(f"{mark} {case.id}  ({seconds:.1f}s)")
+    print(f"     route={trace.route} workflow={trace.workflow_id} verdict={trace.policy_verdict}")
+    print(f"     expected={case.expected_verdict} confidence={trace.confidence}")
+    print(f"     outcome: {_preview(trace.outcome)}\n")
+    return matched
+
+
+def _preview(text: str) -> str:
+    flat = " ".join(text.split())
+    return flat if len(flat) <= _PREVIEW else flat[:_PREVIEW] + " ..."
+
+
+def _listening() -> bool:
+    try:
+        with socket.create_connection((SERVE_HOST, SERVE_PORT), timeout=0.5):
+            return True
+    except OSError:
+        return False
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

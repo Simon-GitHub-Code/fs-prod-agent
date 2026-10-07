@@ -1,5 +1,6 @@
 path,imports
 adapters/aws/profile.py,typing
+adapters/local/agent_strands.py,dataclasses
 adapters/local/agent_strands.py,fs_prod_agent.application.state
 adapters/local/agent_strands.py,fs_prod_agent.decisions.contract
 adapters/local/agent_strands.py,fs_prod_agent.decisions.v1
@@ -12,6 +13,7 @@ adapters/local/agent_strands.py,pathlib
 adapters/local/agent_strands.py,strands
 adapters/local/agent_strands.py,strands.hooks
 adapters/local/agent_strands.py,strands.models.model
+adapters/local/agent_strands.py,strands.models.ollama
 adapters/local/agent_strands.py,strands.session.file_session_manager
 adapters/local/agent_strands.py,tempfile
 adapters/local/agent_strands.py,typing
@@ -93,6 +95,7 @@ composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models
 composition.py,fs_prod_agent.observe.decision_chain
 composition.py,fs_prod_agent.ports.protocols
+composition.py,os
 decisions/__init__.py,fs_prod_agent.decisions.contract
 decisions/contract.py,pydantic
 decisions/contract.py,typing

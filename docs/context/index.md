@@ -25,7 +25,7 @@ Rows here are functions within 4 of the cap, or past it.
 
 ## Files
 
-- `imports.csv` — 144 production import edges.
+- `imports.csv` — 147 production import edges.
 - `hotspots.csv` — 9 functions within 4 of the cap.
 - `guards.csv` — 9 fitness modules.
 
