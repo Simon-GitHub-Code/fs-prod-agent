@@ -2,16 +2,18 @@
 #
 # On this solo repo GitHub does not count a self-approval, so this file routes
 # the diff and does not by itself block a merge. The block is the hash pin in
-# tests/fitness/test_guard_integrity.py, the ask in .grok/hooks/approval.py,
-# and the fitness check on the pull request.
+# tests/fitness/test_guard_integrity.py, the ask in .grok/hooks/approval.py
+# (run by Grok and by Claude Code), and the fitness check on the pull request.
 
 /tests/fitness/                        @Simon-GitHub-Code
 /scripts/context/                      @Simon-GitHub-Code
 /.grok/hooks/                          @Simon-GitHub-Code
+/.claude/settings.json                 @Simon-GitHub-Code
 /.github/CODEOWNERS                    @Simon-GitHub-Code
 /.github/workflows/fitness.yml         @Simon-GitHub-Code
 /.pre-commit-config.yaml               @Simon-GitHub-Code
 /AGENTS.md                             @Simon-GitHub-Code
+/CLAUDE.md                             @Simon-GitHub-Code
 /pyproject.toml                        @Simon-GitHub-Code
 /scripts/bless                         @Simon-GitHub-Code
 /scripts/guardpin.py                   @Simon-GitHub-Code

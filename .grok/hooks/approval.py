@@ -130,3 +130,7 @@ def _segment_mutates(segment: str) -> bool:
     if head in _MUTATING and any(_mentions_pinned(part) for part in parts[1:]):
         return True
     return head == "sed" and "-i" in parts and any(_mentions_pinned(part) for part in parts)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

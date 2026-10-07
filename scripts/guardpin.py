@@ -33,10 +33,12 @@ PINNED_TREES = (
 )
 
 PINNED_FILES = (
+    ".claude/settings.json",
     ".github/CODEOWNERS",
     ".github/workflows/fitness.yml",
     ".pre-commit-config.yaml",
     "AGENTS.md",
+    "CLAUDE.md",
     "pyproject.toml",
     "scripts/bless",
     "scripts/guardpin.py",
