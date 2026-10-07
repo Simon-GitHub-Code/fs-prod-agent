@@ -22,7 +22,7 @@ Decider recommends with a choice, a score, or a noul. Policy disposes. An unavai
 
 Tools are served over MCP. `build("local")` runs the MCP server in-process, and `build("local", tool_server=url)` calls a Streamable HTTP server (`scripts/mcp-server`), where an AgentCore Gateway URL would go. The tool gate and policy run before a call reaches the server. `submit_committee_paper` is the mutating tool. Policy returns `review`. The local book is one quarter: the fund returned 3.10% against an SAA of 2.40%, and private markets sit above the policy band.
 
-`docs/context/` and `.grok/rules/context-pack.md` are generated. The fitness suite rejects a hand edit. Grok loads the rules file at session start, and `CLAUDE.md` imports it for Claude Code. An edit that changes the pack returns that file from `.grok/hooks/context_pack.py`. A read returns the pack query. A write to a pinned fitness test or quality control asks for approval first. Unit and integration tests are not pinned.
+`docs/context/` and `.grok/rules/context-pack.md` are generated. The fitness suite rejects a hand edit. Grok loads the rules file at session start, and an edit that changes it returns it from `.grok/hooks/context_pack.py`. Claude Code gets `docs/context/index.md` from a SessionStart hook, and its edit hook speaks only when a function is over the complexity cap. A write to a pinned fitness test or quality control asks for approval first. Unit and integration tests are not pinned.
 
 ```bash
 scripts/verify

@@ -5,6 +5,12 @@ from pathlib import Path
 
 CAP = 10
 
+# Decision tables. Their branches are the policy. Growing one is a visible edit here.
+GRANDFATHERED = {
+    "decisions/contract.py::validate_decision": 18,
+    "policy/authorize.py::authorize": 16,
+}
+
 
 def function_scores(root: Path) -> dict[str, int]:
     scores: dict[str, int] = {}

@@ -1,13 +1,7 @@
 """Cyclomatic ratchet. New functions stay at or under the cap. Named functions may not grow."""
 
-from scripts.context.lib.complexity import CAP, function_scores, scores_in
+from scripts.context.lib.complexity import CAP, GRANDFATHERED, function_scores, scores_in
 from tests.fitness.support import SRC
-
-# Decision tables. Their branches are the policy. Growing one is a visible edit here.
-GRANDFATHERED = {
-    "decisions/contract.py::validate_decision": 18,
-    "policy/authorize.py::authorize": 16,
-}
 
 
 def test_production_complexity_matches_the_ratchet():
