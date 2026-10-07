@@ -21,6 +21,14 @@ class EvalCase(BaseModel):
     expected_verdict: str
     expected_route: str | None = None
     expected_workflow_id: str | None = None
+    category: str = ""
+
+
+ANALYST = {
+    "actor_id": "analyst-1",
+    "role": "analyst",
+    "scopes": ["search_policy", "get_holdings", "get_manager_report", "draft_briefing", "submit_committee_paper"],
+}
 
 
 def load_cases(directory: Path) -> list[EvalCase]:
@@ -31,6 +39,17 @@ def load_cases(directory: Path) -> list[EvalCase]:
     for path in paths:
         data = json.loads(path.read_text(encoding="utf-8"))
         cases.append(_case_from(data, path))
+    return cases
+
+
+def load_suite(path: Path) -> list[EvalCase]:
+    """One case per line. A line without a principal is the analyst."""
+    cases: list[EvalCase] = []
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if line.strip():
+            cases.append(_case_from({**ANALYST, **json.loads(line)}, f"{path}:{number}"))
+    if not cases:
+        raise ValueError(f"no eval cases in {path}")
     return cases
 
 
@@ -57,4 +76,5 @@ def _case_from(data: dict, source: Path | str) -> EvalCase:
         expected_verdict=expected["verdict"],
         expected_route=expected.get("route"),
         expected_workflow_id=expected.get("workflow_id"),
+        category=data.get("category", ""),
     )

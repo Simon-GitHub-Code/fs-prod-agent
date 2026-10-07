@@ -27,6 +27,7 @@ _UNHASHED = (
 )
 
 PINNED_TREES = (
+    "evals/baselines",
     "tests/fitness",
     "scripts/context",
     ".grok/hooks",

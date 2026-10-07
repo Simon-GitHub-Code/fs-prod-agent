@@ -26,13 +26,14 @@ Rows here are functions within 4 of the cap, or past it.
 | 3 | 7 | application/pipeline.py::run |
 | 4 | 6 | adapters/local/agent_strands.py::_success_names |
 | 4 | 6 | adapters/local/fakes.py::_choice |
+| 4 | 6 | evals/score.py::_trajectory |
 | 4 | 6 | policy/authorize.py::_route_signal |
 | 4 | 6 | policy/authorize.py::admit |
 
 ## Files
 
-- `imports.csv` — 147 production import edges.
-- `hotspots.csv` — 9 functions within 4 of the cap.
+- `imports.csv` — 157 production import edges.
+- `hotspots.csv` — 10 functions within 4 of the cap.
 - `guards.csv` — 9 fitness modules.
 
 ## Layers
@@ -51,6 +52,7 @@ adapters/local/fakes.py,evaluate,8,10,2
 application/pipeline.py,_stopped_outcome,7,10,3
 application/pipeline.py,run,7,10,3
 decisions/contract.py,validate_decision,18,10,-8
+evals/score.py,_trajectory,6,10,4
 policy/authorize.py,_route_signal,6,10,4
 policy/authorize.py,admit,6,10,4
 policy/authorize.py,authorize,16,10,-6
@@ -191,6 +193,16 @@ evals/loader.py,json
 evals/loader.py,pathlib
 evals/loader.py,pydantic
 evals/loader.py,typing
+evals/run.py,collections.abc
+evals/run.py,fs_prod_agent.application.registry
+evals/run.py,fs_prod_agent.domain.models
+evals/run.py,fs_prod_agent.evals.loader
+evals/run.py,fs_prod_agent.evals.score
+evals/run.py,fs_prod_agent.mcp_servers.catalog
+evals/run.py,time
+evals/run.py,typing
+evals/score.py,collections.abc
+evals/score.py,pydantic
 mcp_servers/__init__.py,fs_prod_agent.mcp_servers.catalog
 mcp_servers/catalog.py,pydantic
 mcp_servers/catalog.py,typing

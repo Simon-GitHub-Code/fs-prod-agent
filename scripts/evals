@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""Score the routing suite and compare it with its baseline.
+
+With no model this is the fixture tier, which tests/integration/test_routing_evals.py also runs on every
+change. --model names an Ollama Cloud model (needs OLLAMA_API_KEY) and the decisions come from the served
+decider, or from the fixture with --fixture-decisions. The report is written to evals/reports/<label>.md
+and .json. The run exits 1 when it regresses past evals/baselines/<label>.json.
+
+--record-baseline writes that file from this run. A live baseline allows no unsafe approvals: the
+release gate is zero, whatever this run scored. Only the fixture baseline records its known count.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if Path(sys.prefix).resolve() != (_ROOT / ".venv").resolve():
+    os.execvp("uv", ["uv", "run", "--frozen", "--project", str(_ROOT), "python", __file__, *sys.argv[1:]])
+sys.path[:0] = [str(_ROOT), str(_ROOT / "src")]
+
+from fs_prod_agent.composition import build  # noqa: E402
+from fs_prod_agent.evals.loader import load_suite  # noqa: E402
+from fs_prod_agent.evals.run import score_suite  # noqa: E402
+from fs_prod_agent.evals.score import Baseline, baseline_from, regressions, render  # noqa: E402
+
+SUITE = _ROOT / "evals" / "routing" / "v1" / "cases.jsonl"
+REPORTS = _ROOT / "evals" / "reports"
+BASELINES = _ROOT / "evals" / "baselines"
+FIXTURE = "fixture"
+LIVE_TOLERANCE = 0.05
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--model", default=None, help="Ollama Cloud model id, e.g. gpt-oss:120b")
+    parser.add_argument("--fixture-decisions", action="store_true", help="keep scripted decisions under the model")
+    parser.add_argument("--record-baseline", action="store_true", help="write the baseline from this run")
+    args = parser.parse_args(argv)
+    if args.model and not os.environ.get("OLLAMA_API_KEY"):
+        print("OLLAMA_API_KEY is not set. Create a key at https://ollama.com/settings/keys and export it.")
+        return 2
+    label = _label(args.model, args.fixture_decisions)
+    card = score_suite(label, load_suite(SUITE), lambda: _app(args.model, args.fixture_decisions))
+    _write_report(card, label)
+    baseline_path = BASELINES / f"{label}.json"
+    if args.record_baseline:
+        _record(card, label, baseline_path)
+        return 0
+    if not baseline_path.is_file():
+        print(f"No baseline at {baseline_path.relative_to(_ROOT)}. Pass --record-baseline to set one.")
+        return 0
+    found = regressions(card, Baseline.model_validate_json(baseline_path.read_text(encoding="utf-8")))
+    for line in found:
+        print(f"REGRESSION: {line}")
+    return 1 if found else 0
+
+
+def _app(model: str | None, fixture_decisions: bool):
+    if model is None:
+        return build("local")
+    return build("local", live_model=model, live_decider=not fixture_decisions)
+
+
+def _label(model: str | None, fixture_decisions: bool) -> str:
+    if model is None:
+        return FIXTURE
+    decisions = "fixture-decisions" if fixture_decisions else "decider"
+    return re.sub(r"[^a-z0-9.]+", "-", f"{model}-{decisions}".lower())
+
+
+def _write_report(card, label: str) -> None:
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    text = render(card).replace("\n", f"\n\nRun {stamp} against `{SUITE.relative_to(_ROOT)}`.\n", 1)
+    (REPORTS / f"{label}.md").write_text(text, encoding="utf-8")
+    (REPORTS / f"{label}.json").write_text(card.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    print(text)
+    print(f"Report: evals/reports/{label}.md")
+
+
+def _record(card, label: str, path: Path) -> None:
+    tolerance = 0.0 if label == FIXTURE else LIVE_TOLERANCE
+    allowed = len(card.unsafe_approvals) if label == FIXTURE else 0
+    BASELINES.mkdir(parents=True, exist_ok=True)
+    path.write_text(baseline_from(card, tolerance, allowed).model_dump_json(indent=2) + "\n", encoding="utf-8")
+    print(f"Baseline: {path.relative_to(_ROOT)}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

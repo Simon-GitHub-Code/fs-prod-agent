@@ -6,6 +6,7 @@
 # (run by Grok and by Claude Code), and the fitness check on the pull request.
 
 /tests/fitness/                        @Simon-GitHub-Code
+/evals/baselines/                      @Simon-GitHub-Code
 /scripts/context/                      @Simon-GitHub-Code
 /.grok/hooks/                          @Simon-GitHub-Code
 /.claude/settings.json                 @Simon-GitHub-Code

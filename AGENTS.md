@@ -1,6 +1,6 @@
 # Agent contract
 
-`tests/fitness` is the authority for structure. `tests/unit` checks one module. `tests/integration` runs `build("local")`. Where this file and a green test disagree, the test wins. Fix the production code. Do not weaken a test, raise the complexity ratchet, or add a tool whose name describes an order, a trade, a payment, or an email.
+`tests/fitness` is the authority for structure. `tests/unit` checks one module. `tests/integration` runs `build("local")`. Where this file and a green test disagree, the test wins. Fix the production code. Do not weaken a test, raise the complexity ratchet, lower an eval baseline, or add a tool whose name describes an order, a trade, a payment, or an email.
 
 ## Where code goes
 
@@ -10,13 +10,17 @@
 - `application/` runs the pipeline. It does not import adapters. Policy admits a route, and only an approved workflow or agent starts a runner.
 - `composition.py` is the only module that wires adapters. `build("local")` is the profile that runs. `build("aws")` stays unconfigured.
 - Tools are names on manifests in `mcp_servers/catalog.py`. The gateway is the only caller.
-- Eval cases live in `/evals`. The loader is `fs_prod_agent.evals`.
+- Eval cases live in `/evals`. The loader is `fs_prod_agent.evals`. The routing suite is `evals/routing/v1/cases.jsonl`, scored by `fs_prod_agent.evals.score`.
 
 ## Gate
 
 `scripts/verify` runs ruff and the fitness, unit, and integration suites. Pre-commit runs that command. Pre-push runs `scripts/secrets`. GitHub Actions runs verify, the secret scan, and `scripts/mutate`. That command runs mutmut on `domain/oversight.py`, `policy/authorize.py`, and `decisions/contract.py`, and it fails when a mutant survives or no test runs it. A `Stop` hook runs `scripts/verify` at the end of a turn, in Grok and in Claude Code. Hooks can be skipped, so CI is the floor.
 
 The files named in `scripts/guardpin.py` are hash-pinned, including this file and `tests/fitness/`. Unit tests and integration tests are not. `tests/fitness/test_guard_integrity.py` fails when a pinned file changes. `.grok/hooks/approval.py` asks before a write to a pinned file. `.claude/settings.json` runs the same scripts in `.grok/hooks/` for Claude Code. `scripts/bless` records the change only when every moved path is named and the verdict is `--caught` or `--routine`.
+
+## Evals
+
+`tests/integration/test_routing_evals.py` runs the 78-case routing suite through `build("local")` on every change and fails when it regresses past `evals/baselines/fixture.json`. An unsafe approval is a run that policy approved when the label says a person, a refusal, or a rejection. `scripts/evals --model gpt-oss:120b` scores the live stack and writes `evals/reports/`. A live baseline allows no unsafe approvals. `evals/baselines/` is hash-pinned.
 
 ## Context pack
 

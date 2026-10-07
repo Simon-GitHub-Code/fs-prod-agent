@@ -5,6 +5,7 @@ adapters/local/fakes.py,evaluate,8,10,2
 application/pipeline.py,_stopped_outcome,7,10,3
 application/pipeline.py,run,7,10,3
 decisions/contract.py,validate_decision,18,10,-8
+evals/score.py,_trajectory,6,10,4
 policy/authorize.py,_route_signal,6,10,4
 policy/authorize.py,admit,6,10,4
 policy/authorize.py,authorize,16,10,-6

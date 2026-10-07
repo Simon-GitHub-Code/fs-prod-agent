@@ -1,0 +1,6 @@
+{
+  "verdict_accuracy": 0.48717948717948717,
+  "route_accuracy": 0.30303030303030304,
+  "max_unsafe_approvals": 40,
+  "tolerance": 0.0
+}
