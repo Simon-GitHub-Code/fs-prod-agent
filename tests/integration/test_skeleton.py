@@ -38,7 +38,10 @@ def test_quarterly_pack_mandate_check_and_open_question_take_one_path_each():
     assert open_question.route == "agent"
     assert open_question.workflow_id is None
     assert open_question.policy_verdict == "approve"
-    assert open_question.outcome == "oversight_analyst:scripted"
+    called = app.pipeline.services.gateway.calls
+    assert called
+    listed = [part.strip() for part in open_question.outcome.split("tools:", 1)[1].split(",")]
+    assert listed == called
 
     refused = app.invoke({"actor_id": "analyst-1", "request": order["request"]}, "order")
     assert refused.route == "refuse"

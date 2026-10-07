@@ -1,4 +1,5 @@
 path,symbol,cc,cap,headroom
+adapters/local/agent_strands.py,_success_names,6,10,4
 adapters/local/fakes.py,_choice,6,10,4
 adapters/local/fakes.py,evaluate,8,10,2
 application/pipeline.py,_stopped_outcome,7,10,3

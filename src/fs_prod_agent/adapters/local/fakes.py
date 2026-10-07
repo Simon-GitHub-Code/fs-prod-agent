@@ -124,8 +124,12 @@ class InMemoryMemory:
 
 
 class LocalGateway:
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
     def call(self, tool_name: str, arguments: dict[str, str]) -> str:
         manifest_for(tool_name)
+        self.calls.append(tool_name)
         return f"{tool_name}:ok"
 
 

@@ -37,11 +37,16 @@ def build(profile: str = "local") -> App:
     return _build_local()
 
 
+def serve_desk(host: str = "127.0.0.1", port: int = 8766) -> None:
+    from fs_prod_agent.adapters.local.desk import serve
+
+    serve(build, host, port)
+
+
 def _build_local() -> App:
+    from fs_prod_agent.adapters.local.agent_strands import StrandsAgentRunner
+    from fs_prod_agent.adapters.local.decision_decider import DeciderClient
     from fs_prod_agent.adapters.local.fakes import (
-        FixtureAgentRunner,
-        FixtureDecision,
-        FixtureWorkflowRunner,
         InMemoryIdentity,
         InMemoryMemory,
         InMemoryReview,
@@ -50,22 +55,25 @@ def _build_local() -> App:
         StaticRetriever,
         default_principal,
     )
+    from fs_prod_agent.adapters.local.workflow_langgraph import LangGraphWorkflow
 
     principal = default_principal()
     memory = InMemoryMemory()
     review = InMemoryReview()
     trace = JsonlTrace()
     identity = InMemoryIdentity({principal.actor_id: principal})
+    gateway = LocalGateway()
+    decision = DeciderClient()
     pipeline = Pipeline(
         Services(
-            decision=FixtureDecision(),
+            decision=decision,
             memory=memory,
-            gateway=LocalGateway(),
+            gateway=gateway,
             retriever=StaticRetriever(),
             trace=trace,
             human_review=review,
-            workflow=FixtureWorkflowRunner(),
-            agent=FixtureAgentRunner(),
+            workflow=LangGraphWorkflow(),
+            agent=StrandsAgentRunner(gateway, decision, review),
         )
     )
     return App(

@@ -18,19 +18,20 @@ Rows here are functions within 4 of the cap, or past it.
 | 2 | 8 | adapters/local/fakes.py::evaluate |
 | 3 | 7 | application/pipeline.py::_stopped_outcome |
 | 3 | 7 | application/pipeline.py::run |
+| 4 | 6 | adapters/local/agent_strands.py::_success_names |
 | 4 | 6 | adapters/local/fakes.py::_choice |
 | 4 | 6 | policy/authorize.py::_route_signal |
 | 4 | 6 | policy/authorize.py::admit |
 
 ## Files
 
-- `imports.csv` — 90 production import edges.
-- `hotspots.csv` — 8 functions within 4 of the cap.
+- `imports.csv` — 144 production import edges.
+- `hotspots.csv` — 9 functions within 4 of the cap.
 - `guards.csv` — 13 fitness modules.
 
 ## Layers
 
-adapters, agents, application, composition, decisions, domain, evals, mcp_servers, observe, policy, ports, workflows
+adapters, agents, application, composition, decisions, desk.py, domain, evals, mcp_servers, observe, policy, ports, workflows
 
 Boundary collectors report clean.
 Spine collectors report clean.

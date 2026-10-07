@@ -9,7 +9,7 @@
   ".grok/hooks/fitness_stop.py": "82bc97315a78941ab0bb8a8ec476a1521a3ece981c16a2cee9a6807980644eaf",
   ".pre-commit-config.yaml": "959dbae60aad5d1a301bfcb31ba7a6b831f138e37b0adcbb53695d7594c2c0bd",
   "AGENTS.md": "9c5433a9fd0821c5ad19d51e14e81057958795601cc29b8a79b072e7e8e438dd",
-  "pyproject.toml": "d04c5481680a6b2894c72385c700b3276bef8242a9a23800bf0f8009412f9647",
+  "pyproject.toml": "5f2774a31568848db1cbd2587841f51687c7c466df3caf979c64f3d66cc2642a",
   "scripts/bless": "6b2ef6ca3779de385ce5b5ae51f63fc9a4438a19e3237d815019c11a33ab8162",
   "scripts/context/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "scripts/context/build.py": "b58993d9c7b9f38f76fbf9cdeb4131a10864ae50352d2d73514487c141e65f5d",

@@ -24,19 +24,20 @@ Rows here are functions within 4 of the cap, or past it.
 | 2 | 8 | adapters/local/fakes.py::evaluate |
 | 3 | 7 | application/pipeline.py::_stopped_outcome |
 | 3 | 7 | application/pipeline.py::run |
+| 4 | 6 | adapters/local/agent_strands.py::_success_names |
 | 4 | 6 | adapters/local/fakes.py::_choice |
 | 4 | 6 | policy/authorize.py::_route_signal |
 | 4 | 6 | policy/authorize.py::admit |
 
 ## Files
 
-- `imports.csv` — 90 production import edges.
-- `hotspots.csv` — 8 functions within 4 of the cap.
+- `imports.csv` — 144 production import edges.
+- `hotspots.csv` — 9 functions within 4 of the cap.
 - `guards.csv` — 13 fitness modules.
 
 ## Layers
 
-adapters, agents, application, composition, decisions, domain, evals, mcp_servers, observe, policy, ports, workflows
+adapters, agents, application, composition, decisions, desk.py, domain, evals, mcp_servers, observe, policy, ports, workflows
 
 Boundary collectors report clean.
 Spine collectors report clean.
@@ -44,6 +45,7 @@ Spine collectors report clean.
 ## hotspots.csv
 
 path,symbol,cc,cap,headroom
+adapters/local/agent_strands.py,_success_names,6,10,4
 adapters/local/fakes.py,_choice,6,10,4
 adapters/local/fakes.py,evaluate,8,10,2
 application/pipeline.py,_stopped_outcome,7,10,3
@@ -74,8 +76,47 @@ tests/fitness/test_tools.py,Tools are manifest names. Agents and workflows do no
 
 path,imports
 adapters/aws/profile.py,typing
+adapters/local/agent_strands.py,fs_prod_agent.application.state
+adapters/local/agent_strands.py,fs_prod_agent.decisions.contract
+adapters/local/agent_strands.py,fs_prod_agent.decisions.v1
+adapters/local/agent_strands.py,fs_prod_agent.domain.models
+adapters/local/agent_strands.py,fs_prod_agent.mcp_servers.catalog
+adapters/local/agent_strands.py,fs_prod_agent.policy.authorize
+adapters/local/agent_strands.py,fs_prod_agent.ports.protocols
+adapters/local/agent_strands.py,json
+adapters/local/agent_strands.py,pathlib
+adapters/local/agent_strands.py,strands
+adapters/local/agent_strands.py,strands.hooks
+adapters/local/agent_strands.py,strands.models.model
+adapters/local/agent_strands.py,strands.session.file_session_manager
+adapters/local/agent_strands.py,tempfile
+adapters/local/agent_strands.py,typing
 adapters/local/books.py,fs_prod_agent.domain.models
+adapters/local/decision_decider.py,fs_prod_agent.adapters.local.fakes
+adapters/local/decision_decider.py,fs_prod_agent.application.state
+adapters/local/decision_decider.py,fs_prod_agent.decisions.contract
+adapters/local/decision_decider.py,fs_prod_agent.decisions.v1
+adapters/local/decision_decider.py,json
+adapters/local/decision_decider.py,strands_decider
+adapters/local/decision_decider.py,typing
+adapters/local/decision_decider.py,urllib.error
+adapters/local/decision_decider.py,urllib.request
 adapters/local/decision_fixture.py,fs_prod_agent.adapters.local.fakes
+adapters/local/desk.py,collections.abc
+adapters/local/desk.py,dataclasses
+adapters/local/desk.py,fs_prod_agent.adapters.local.desk_audit
+adapters/local/desk.py,fs_prod_agent.adapters.local.desk_page
+adapters/local/desk.py,fs_prod_agent.evals.loader
+adapters/local/desk.py,fs_prod_agent.observe.decision_chain
+adapters/local/desk.py,http.server
+adapters/local/desk.py,pathlib
+adapters/local/desk.py,typing
+adapters/local/desk.py,urllib.parse
+adapters/local/desk_audit.py,dataclasses
+adapters/local/desk_audit.py,fs_prod_agent.decisions.contract
+adapters/local/desk_audit.py,fs_prod_agent.observe.decision_chain
+adapters/local/desk_page.py,fs_prod_agent.adapters.local.desk_audit
+adapters/local/desk_page.py,html
 adapters/local/fakes.py,dataclasses
 adapters/local/fakes.py,fs_prod_agent.adapters.local.books
 adapters/local/fakes.py,fs_prod_agent.application.registry
@@ -90,6 +131,15 @@ adapters/local/fakes.py,fs_prod_agent.observe.decision_chain
 adapters/local/fakes.py,fs_prod_agent.observe.review
 adapters/local/fakes.py,fs_prod_agent.policy.memory_rules
 adapters/local/fakes.py,pathlib
+adapters/local/workflow_langgraph.py,collections.abc
+adapters/local/workflow_langgraph.py,fs_prod_agent.adapters.local.books
+adapters/local/workflow_langgraph.py,fs_prod_agent.adapters.local.fakes
+adapters/local/workflow_langgraph.py,fs_prod_agent.application.registry
+adapters/local/workflow_langgraph.py,fs_prod_agent.application.state
+adapters/local/workflow_langgraph.py,fs_prod_agent.domain.models
+adapters/local/workflow_langgraph.py,fs_prod_agent.domain.oversight
+adapters/local/workflow_langgraph.py,langgraph.graph
+adapters/local/workflow_langgraph.py,typing
 agents/__init__.py,fs_prod_agent.agents.oversight
 application/__init__.py,fs_prod_agent.application.pipeline
 application/__init__.py,fs_prod_agent.application.state
@@ -110,7 +160,11 @@ application/state.py,fs_prod_agent.domain.models
 application/state.py,pydantic
 composition.py,dataclasses
 composition.py,fs_prod_agent.adapters.aws.profile
+composition.py,fs_prod_agent.adapters.local.agent_strands
+composition.py,fs_prod_agent.adapters.local.decision_decider
+composition.py,fs_prod_agent.adapters.local.desk
 composition.py,fs_prod_agent.adapters.local.fakes
+composition.py,fs_prod_agent.adapters.local.workflow_langgraph
 composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models
 composition.py,fs_prod_agent.observe.decision_chain
@@ -126,6 +180,8 @@ decisions/v1/materiality.py,fs_prod_agent.decisions.contract
 decisions/v1/materiality.py,fs_prod_agent.decisions.v1.route
 decisions/v1/route.py,fs_prod_agent.decisions.contract
 decisions/v1/tool_gate.py,fs_prod_agent.decisions.contract
+desk.py,argparse
+desk.py,fs_prod_agent.composition
 domain/__init__.py,fs_prod_agent.domain.models
 domain/models.py,enum
 domain/models.py,pydantic
