@@ -1,6 +1,13 @@
-"""context → decide → authorize → execute → observe. Evaluate stays outside this loop."""
+"""context → decide → authorize → execute → observe. Evaluate stays outside this loop.
+
+Each request is an OpenTelemetry span carrying the decision chain, with a child span per decision and per
+execution. This is the OTel API only: with no provider configured the spans are no-ops, and the exporter
+is chosen at the edge, in composition.
+"""
 
 from dataclasses import dataclass
+
+from opentelemetry import trace
 
 from fs_prod_agent.application.registry import workflow_by_id
 from fs_prod_agent.application.state import AgentState, build_agent_state
@@ -20,6 +27,9 @@ from fs_prod_agent.ports.protocols import (
     WorkflowRunner,
 )
 
+_TRACER = trace.get_tracer("fs_prod_agent.pipeline")
+_OUTCOME_CHARS = 256
+
 
 @dataclass
 class Services:
@@ -37,6 +47,7 @@ class Pipeline:
     def __init__(self, services: Services) -> None:
         self.services = services
 
+    @_TRACER.start_as_current_span("oversight.run")
     def run(self, request: str, principal: Principal, session_id: str) -> TraceRecord:
         self.services.memory.append_turn(principal.actor_id, session_id, request)
         evidence = self.services.retriever.retrieve(request)
@@ -49,7 +60,8 @@ class Pipeline:
         if verdict is Verdict.approve and route == "workflow":
             outcome = self._run_workflow(workflow_id, request, evidence, principal, answers)
         elif verdict is Verdict.approve and route == "agent":
-            outcome = self.services.agent.run(state)
+            with _TRACER.start_as_current_span("execute agent"):
+                outcome = self.services.agent.run(state)
         elif verdict is Verdict.review:
             self.services.human_review.enqueue(session_id, principal.actor_id, "ingress")
             outcome = "pending_review"
@@ -68,6 +80,7 @@ class Pipeline:
             confidence_key="route",
         )
 
+    @_TRACER.start_as_current_span("oversight.dispatch_tool")
     def dispatch_tool(
         self,
         request: str,
@@ -82,7 +95,8 @@ class Pipeline:
         tool_name: str | None = None
         if verdict is Verdict.approve:
             tool_name = action.tool_name
-            outcome = self.services.gateway.call(action.tool_name, dict(action.arguments))
+            with _TRACER.start_as_current_span(f"execute tool {action.tool_name}"):
+                outcome = self.services.gateway.call(action.tool_name, dict(action.arguments))
         elif verdict is Verdict.review:
             self.services.human_review.enqueue(session_id, principal.actor_id, action.tool_name)
             outcome = "pending_review"
@@ -108,8 +122,16 @@ class Pipeline:
         )
 
     def _decide(self, state: AgentState, contract: str, questions: list) -> DecisionResult:
-        raw = self.services.decision.evaluate(state, contract)
-        return validate_decision(raw, questions)
+        with _TRACER.start_as_current_span(f"decide {contract}") as span:
+            decision = validate_decision(self.services.decision.evaluate(state, contract), questions)
+            span.set_attributes(
+                {
+                    "oversight.decision.contract": contract,
+                    "oversight.decision.available": decision.available,
+                    "oversight.decision.invalid": decision.invalid,
+                }
+            )
+            return decision
 
     def _emit(
         self,
@@ -127,7 +149,7 @@ class Pipeline:
         confidence_key: str,
     ) -> TraceRecord:
         confidence_answer = decision.answers.get(confidence_key)
-        trace = TraceRecord(
+        record = TraceRecord(
             user_request=request,
             route=route,
             workflow_id=workflow_id,
@@ -142,8 +164,9 @@ class Pipeline:
             policy_overrode_decider=overrode(decision, verdict),
             confidence=None if confidence_answer is None else confidence_answer.confidence,
         )
-        self.services.trace.record(trace)
-        return trace
+        self.services.trace.record(record)
+        _annotate(record)
+        return record
 
     def _run_workflow(
         self,
@@ -157,7 +180,8 @@ class Pipeline:
             raise ValueError("workflow route missing workflow_id")
         spec = workflow_by_id(workflow_id)
         state = build_agent_state(request, evidence, None, principal)
-        outcome = self.services.workflow.run(workflow_id, state)
+        with _TRACER.start_as_current_span(f"execute workflow {workflow_id}"):
+            outcome = self.services.workflow.run(workflow_id, state)
         if spec.follow_up is None:
             return outcome
         follow_state = build_agent_state(request, evidence, None, principal, outcome)
@@ -188,3 +212,20 @@ def _stopped_outcome(verdict: Verdict, route: str | None) -> str:
     if verdict is Verdict.review:
         return "pending_review"
     return "pending"
+
+
+def _annotate(record: TraceRecord) -> None:
+    """The decision chain on the request span. OTel attributes cannot be None, so absent fields are left off."""
+    fields = {
+        "session.id": record.session_id,
+        "enduser.id": record.actor_id,
+        "oversight.route": record.route,
+        "oversight.workflow_id": record.workflow_id,
+        "oversight.decision_contract_version": record.decision_contract_version,
+        "oversight.policy_verdict": record.policy_verdict,
+        "oversight.policy_overrode_decider": record.policy_overrode_decider,
+        "oversight.confidence": record.confidence,
+        "oversight.tool_name": record.tool_name,
+        "oversight.outcome": record.outcome[:_OUTCOME_CHARS],
+    }
+    trace.get_current_span().set_attributes({key: value for key, value in fields.items() if value is not None})

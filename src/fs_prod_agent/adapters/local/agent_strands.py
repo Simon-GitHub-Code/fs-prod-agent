@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from opentelemetry import trace
+
 from fs_prod_agent.application.state import AgentState, build_agent_state
 from fs_prod_agent.decisions.contract import validate_decision
 from fs_prod_agent.decisions.v1 import questions_for
@@ -18,6 +20,7 @@ from fs_prod_agent.ports.protocols import DecisionPort, GatewayPort, HumanReview
 
 _READ_TOOLS = ("get_manager_report", "search_policy")
 _PIPELINE_SESSION = "oversight"
+_TRACER = trace.get_tracer("fs_prod_agent.agent")
 OLLAMA_CLOUD_HOST = "https://ollama.com"
 SYSTEM_PROMPT = (
     "You are the oversight analyst at a large asset owner. "
@@ -193,8 +196,10 @@ def _screen(
     name = event.tool_use["name"]
     manifest = manifest_for(name)
     action = Action(tool_name=name, effect=Effect(manifest.effect), arguments=_string_args(event.tool_use.get("input")))
-    raw = decision.evaluate(build_agent_state(name, [], action, principal), "tool_gate")
-    verdict = authorize(principal, action, validate_decision(raw, questions_for("tool_gate")))
+    with _TRACER.start_as_current_span(f"gate tool {name}") as span:
+        raw = decision.evaluate(build_agent_state(name, [], action, principal), "tool_gate")
+        verdict = authorize(principal, action, validate_decision(raw, questions_for("tool_gate")))
+        span.set_attributes({"oversight.tool_name": name, "oversight.policy_verdict": verdict.value})
     if verdict is Verdict.approve:
         return
     event.cancel_tool = verdict.value

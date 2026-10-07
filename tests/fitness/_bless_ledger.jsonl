@@ -11,3 +11,4 @@
 {"artefact": "guard_manifest", "at": "2026-10-07T04:30:17.329760+00:00", "note": "add the strands-agents ollama extra for the live agent model", "paths": ["pyproject.toml"], "verdict": "routine"}
 {"artefact": "guard_manifest", "at": "2026-10-07T06:27:25.896872+00:00", "note": "pin the eval baselines; record the routing suite gate in AGENTS.md", "paths": [".github/CODEOWNERS", "AGENTS.md", "evals/baselines/fixture.json", "scripts/guardpin.py"], "verdict": "routine"}
 {"artefact": "guard_manifest", "at": "2026-10-07T07:10:46.089086+00:00", "note": "declare mcp; serve the tools over MCP and route the gateway through it", "paths": ["AGENTS.md", "pyproject.toml"], "verdict": "routine"}
+{"artefact": "guard_manifest", "at": "2026-10-07T08:44:11.517598+00:00", "note": "add the strands otel extra for the OTLP span exporter", "paths": ["pyproject.toml"], "verdict": "routine"}

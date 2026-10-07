@@ -8,3 +8,4 @@ dist/
 build/
 mutants/
 .mutmut-cache
+var/

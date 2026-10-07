@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Watch a decision-chain trace log for drift. Run it on a schedule against the live trace log.
+
+The first --window records are the baseline, and each later full window is compared with it. The
+signals need no labels: human override rate, route mix, mean decider confidence, and the share of
+failed or uncertain verdicts. Exits 1 when the latest window has drifted.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if Path(sys.prefix).resolve() != (_ROOT / ".venv").resolve():
+    os.execvp("uv", ["uv", "run", "--frozen", "--project", str(_ROOT), "python", __file__, *sys.argv[1:]])
+sys.path[:0] = [str(_ROOT), str(_ROOT / "src")]
+
+from fs_prod_agent.observe.drift import rolling  # noqa: E402
+from scripts.drift_report import load, print_timeline  # noqa: E402
+
+DEFAULT_LOG = _ROOT / "var" / "traces.jsonl"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("trace_log", nargs="?", type=Path, default=DEFAULT_LOG)
+    parser.add_argument("--window", type=int, default=30, help="records per window")
+    args = parser.parse_args(argv)
+    records = load(args.trace_log)
+    reports = rolling(records, args.window)
+    if not reports:
+        print(f"{len(records)} records in {args.trace_log}; drift needs at least two windows of {args.window}.")
+        return 0
+    print_timeline(reports, args.window)
+    return 1 if reports[-1].shifted else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

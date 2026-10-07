@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Replay realistic desk traffic, inject one change part-way, and show when the drift monitor fires.
+
+Requests are drawn from the routing suite with a production-like mix: mostly the two workflows and open
+questions, some tool calls, the odd order. After --steady requests one change is injected:
+
+  confidence-decay  a new decider version is 10% less sure. Every verdict is unchanged, so users see
+                    nothing yet; only the confidence signal moves.
+  route-flip        a new decider version sends 40% of workflow requests to the agent.
+  decider-outage    30% of decisions come back unavailable, and policy fails them closed.
+  input-shift       the traffic itself changes: far more orders and injection attempts.
+
+The trace log is written fresh, then the monitor runs over it in windows, as scripts/drift would.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import random
+import sys
+from pathlib import Path
+
+_ROOT = Path(__file__).resolve().parents[1]
+if Path(sys.prefix).resolve() != (_ROOT / ".venv").resolve():
+    os.execvp("uv", ["uv", "run", "--frozen", "--project", str(_ROOT), "python", __file__, *sys.argv[1:]])
+sys.path[:0] = [str(_ROOT), str(_ROOT / "src")]
+
+from fs_prod_agent.composition import build  # noqa: E402
+from fs_prod_agent.decisions.contract import DecisionResult, unavailable  # noqa: E402
+from fs_prod_agent.domain.models import Action  # noqa: E402
+from fs_prod_agent.evals.loader import EvalCase, load_suite  # noqa: E402
+from fs_prod_agent.observe.drift import rolling  # noqa: E402
+from scripts.drift_report import load, print_timeline  # noqa: E402
+
+SUITE = _ROOT / "evals" / "routing" / "v1" / "cases.jsonl"
+STEADY_MIX = {
+    "performance_pack": 4,
+    "mandate_check": 4,
+    "open_question": 5,
+    "tool_gate": 3,
+    "needs_human": 1,
+    "ambiguous": 1,
+    "disguised_order": 1,
+}
+SHIFTED_MIX = {**STEADY_MIX, "disguised_order": 6, "prompt_injection": 5, "out_of_scope_action": 4}
+INJECTIONS = ("confidence-decay", "route-flip", "decider-outage", "input-shift")
+
+
+class Injected:
+    """Wraps the decision port the way a new model version or an outage would change it."""
+
+    def __init__(self, inner, kind: str, rng: random.Random) -> None:
+        self.inner, self.kind, self.rng = inner, kind, rng
+
+    def evaluate(self, state, contract: str) -> DecisionResult:
+        if self.kind == "decider-outage" and self.rng.random() < 0.3:
+            return unavailable("v1", "simulated decider outage")
+        decision = self.inner.evaluate(state, contract)
+        if self.kind == "confidence-decay":
+            return _scaled(decision, 0.9)
+        if self.kind == "route-flip" and contract == "ingress" and self.rng.random() < 0.4:
+            return _flipped(decision)
+        return decision
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--inject", choices=INJECTIONS, default="confidence-decay")
+    parser.add_argument("--steady", type=int, default=90, help="requests before the change")
+    parser.add_argument("--after", type=int, default=90, help="requests after the change")
+    parser.add_argument("--window", type=int, default=30)
+    parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--trace-log", type=Path, default=_ROOT / "var" / "simulated.jsonl")
+    args = parser.parse_args(argv)
+    rng = random.Random(args.seed)
+    pools = _pools(load_suite(SUITE))
+    args.trace_log.parent.mkdir(parents=True, exist_ok=True)
+    args.trace_log.write_text("", encoding="utf-8")
+    for number in range(args.steady + args.after):
+        injected = number >= args.steady
+        mix = SHIFTED_MIX if injected and args.inject == "input-shift" else STEADY_MIX
+        _send(rng.choice(pools[_category(rng, mix)]), args, rng, injected, number)
+    reports = rolling(load(args.trace_log), args.window)
+    change_window = args.steady // args.window
+    print(f"Injected {args.inject} after request {args.steady} (window {change_window}).\n")
+    print_timeline(reports, args.window, {change_window: "   <- change injected here"})
+    first = next((index for index, report in enumerate(reports, start=1) if report.shifted), None)
+    print(f"\nFirst drift alert: window {first}." if first else "\nNo drift alert.")
+    return 0
+
+
+def _send(case: EvalCase, args, rng: random.Random, injected: bool, number: int) -> None:
+    app = build("local", trace_log=args.trace_log)
+    if injected and args.inject != "input-shift":
+        app.pipeline.services.decision = Injected(app.pipeline.services.decision, args.inject, rng)
+    session = f"sim-{number}"
+    if case.stage == "ingress":
+        app.pipeline.run(case.request, case.principal, session)
+        return
+    assert case.tool_name is not None and case.effect is not None
+    action = Action(tool_name=case.tool_name, effect=case.effect)
+    app.pipeline.dispatch_tool(case.request, case.principal, action, session)
+
+
+def _pools(cases: list[EvalCase]) -> dict[str, list[EvalCase]]:
+    pools: dict[str, list[EvalCase]] = {}
+    for case in cases:
+        pools.setdefault(case.category, []).append(case)
+    return pools
+
+
+def _category(rng: random.Random, mix: dict[str, int]) -> str:
+    return rng.choices(list(mix), weights=list(mix.values()))[0]
+
+
+def _scaled(decision: DecisionResult, factor: float) -> DecisionResult:
+    answers = {
+        key: answer.model_copy(update={"confidence": None if answer.confidence is None else answer.confidence * factor})
+        for key, answer in decision.answers.items()
+    }
+    return decision.model_copy(update={"answers": answers})
+
+
+def _flipped(decision: DecisionResult) -> DecisionResult:
+    route = decision.answers.get("route")
+    if route is None or route.choice != "workflow":
+        return decision
+    answers = dict(decision.answers)
+    answers["route"] = route.model_copy(update={"choice": "agent"})
+    answers["workflow_id"] = answers["workflow_id"].model_copy(update={"choice": "none"})
+    return decision.model_copy(update={"answers": answers})
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

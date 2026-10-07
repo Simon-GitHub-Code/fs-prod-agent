@@ -16,18 +16,19 @@ Rows here are functions within 4 of the cap, or past it.
 | -8 | 18 | decisions/contract.py::validate_decision |
 | -6 | 16 | policy/authorize.py::authorize |
 | 2 | 8 | adapters/local/fakes.py::evaluate |
+| 2 | 8 | application/pipeline.py::run |
 | 3 | 7 | application/pipeline.py::_stopped_outcome |
-| 3 | 7 | application/pipeline.py::run |
 | 4 | 6 | adapters/local/agent_strands.py::_success_names |
 | 4 | 6 | adapters/local/fakes.py::_choice |
+| 4 | 6 | application/pipeline.py::dispatch_tool |
 | 4 | 6 | evals/score.py::_trajectory |
 | 4 | 6 | policy/authorize.py::_route_signal |
 | 4 | 6 | policy/authorize.py::admit |
 
 ## Files
 
-- `imports.csv` — 170 production import edges.
-- `hotspots.csv` — 10 functions within 4 of the cap.
+- `imports.csv` — 179 production import edges.
+- `hotspots.csv` — 11 functions within 4 of the cap.
 - `guards.csv` — 9 fitness modules.
 
 ## Layers

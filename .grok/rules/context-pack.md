@@ -22,18 +22,19 @@ Rows here are functions within 4 of the cap, or past it.
 | -8 | 18 | decisions/contract.py::validate_decision |
 | -6 | 16 | policy/authorize.py::authorize |
 | 2 | 8 | adapters/local/fakes.py::evaluate |
+| 2 | 8 | application/pipeline.py::run |
 | 3 | 7 | application/pipeline.py::_stopped_outcome |
-| 3 | 7 | application/pipeline.py::run |
 | 4 | 6 | adapters/local/agent_strands.py::_success_names |
 | 4 | 6 | adapters/local/fakes.py::_choice |
+| 4 | 6 | application/pipeline.py::dispatch_tool |
 | 4 | 6 | evals/score.py::_trajectory |
 | 4 | 6 | policy/authorize.py::_route_signal |
 | 4 | 6 | policy/authorize.py::admit |
 
 ## Files
 
-- `imports.csv` — 170 production import edges.
-- `hotspots.csv` — 10 functions within 4 of the cap.
+- `imports.csv` — 179 production import edges.
+- `hotspots.csv` — 11 functions within 4 of the cap.
 - `guards.csv` — 9 fitness modules.
 
 ## Layers
@@ -50,7 +51,8 @@ adapters/local/agent_strands.py,_success_names,6,10,4
 adapters/local/fakes.py,_choice,6,10,4
 adapters/local/fakes.py,evaluate,8,10,2
 application/pipeline.py,_stopped_outcome,7,10,3
-application/pipeline.py,run,7,10,3
+application/pipeline.py,dispatch_tool,6,10,4
+application/pipeline.py,run,8,10,2
 decisions/contract.py,validate_decision,18,10,-8
 evals/score.py,_trajectory,6,10,4
 policy/authorize.py,_route_signal,6,10,4
@@ -83,6 +85,7 @@ adapters/local/agent_strands.py,fs_prod_agent.mcp_servers.catalog
 adapters/local/agent_strands.py,fs_prod_agent.policy.authorize
 adapters/local/agent_strands.py,fs_prod_agent.ports.protocols
 adapters/local/agent_strands.py,json
+adapters/local/agent_strands.py,opentelemetry
 adapters/local/agent_strands.py,pathlib
 adapters/local/agent_strands.py,strands
 adapters/local/agent_strands.py,strands.hooks
@@ -142,6 +145,11 @@ adapters/local/mcp_tools.py,fs_prod_agent.adapters.local.books
 adapters/local/mcp_tools.py,fs_prod_agent.mcp_servers.catalog
 adapters/local/mcp_tools.py,mcp.server.mcpserver
 adapters/local/mcp_tools.py,mcp_types
+adapters/local/telemetry.py,opentelemetry
+adapters/local/telemetry.py,opentelemetry.exporter.otlp.proto.http.trace_exporter
+adapters/local/telemetry.py,opentelemetry.sdk.resources
+adapters/local/telemetry.py,opentelemetry.sdk.trace
+adapters/local/telemetry.py,opentelemetry.sdk.trace.export
 adapters/local/workflow_langgraph.py,collections.abc
 adapters/local/workflow_langgraph.py,fs_prod_agent.adapters.local.books
 adapters/local/workflow_langgraph.py,fs_prod_agent.adapters.local.fakes
@@ -163,6 +171,7 @@ application/pipeline.py,fs_prod_agent.domain.models
 application/pipeline.py,fs_prod_agent.observe.decision_chain
 application/pipeline.py,fs_prod_agent.policy.authorize
 application/pipeline.py,fs_prod_agent.ports.protocols
+application/pipeline.py,opentelemetry
 application/registry.py,fs_prod_agent.agents.oversight
 application/registry.py,fs_prod_agent.workflows.mandate_check
 application/registry.py,fs_prod_agent.workflows.performance_pack
@@ -177,12 +186,14 @@ composition.py,fs_prod_agent.adapters.local.desk
 composition.py,fs_prod_agent.adapters.local.fakes
 composition.py,fs_prod_agent.adapters.local.gateway_mcp
 composition.py,fs_prod_agent.adapters.local.mcp_tools
+composition.py,fs_prod_agent.adapters.local.telemetry
 composition.py,fs_prod_agent.adapters.local.workflow_langgraph
 composition.py,fs_prod_agent.application.pipeline
 composition.py,fs_prod_agent.domain.models
 composition.py,fs_prod_agent.observe.decision_chain
 composition.py,fs_prod_agent.ports.protocols
 composition.py,os
+composition.py,pathlib
 decisions/__init__.py,fs_prod_agent.decisions.contract
 decisions/contract.py,pydantic
 decisions/contract.py,typing

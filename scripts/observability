@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Run Jaeger locally to receive the desk's traces: OTLP/HTTP on 127.0.0.1:4318, UI on 127.0.0.1:16686.
+#   scripts/observability up | down
+# Then pass otlp_endpoint="http://127.0.0.1:4318" to build("local"), or --otlp to the desk.
+# On AWS the same spans go to an ADOT collector and CloudWatch; the instrumented code does not change.
+set -euo pipefail
+engine="$(command -v podman || command -v docker)"
+name=fs-prod-agent-jaeger
+case "${1:-up}" in
+  up)
+    "$engine" rm -f "$name" >/dev/null 2>&1 || true
+    "$engine" run -d --name "$name" -p 127.0.0.1:16686:16686 -p 127.0.0.1:4318:4318 \
+      docker.io/jaegertracing/jaeger:2.10.0 >/dev/null
+    echo "Jaeger UI http://127.0.0.1:16686 | OTLP http://127.0.0.1:4318"
+    ;;
+  down)
+    "$engine" rm -f "$name" >/dev/null
+    ;;
+  *)
+    echo "usage: scripts/observability up|down" >&2
+    exit 2
+    ;;
+esac

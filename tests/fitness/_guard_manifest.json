@@ -12,7 +12,7 @@
   "AGENTS.md": "d69b02e3f1dc44d63265a89f898e87cabfc5ddf38016620ea749dcdebb183982",
   "CLAUDE.md": "73f922b48c4cd05459409f273d535ca7a517479b81b541a19353c4c7039d42b0",
   "evals/baselines/fixture.json": "156c165f28dfdec94ace6a7dc71f5b744eccf12a3a05801b4ad959c94dca5e4c",
-  "pyproject.toml": "2208353f343035fdc39a8abb468f94a1cdb5f666b173578b6c878337404cb03a",
+  "pyproject.toml": "7940ad25e3ea11f6887c95fed335f4cf69eca8f7b5ffddda27e689d4a72cf8ad",
   "scripts/bless": "6b2ef6ca3779de385ce5b5ae51f63fc9a4438a19e3237d815019c11a33ab8162",
   "scripts/context/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "scripts/context/build.py": "b58993d9c7b9f38f76fbf9cdeb4131a10864ae50352d2d73514487c141e65f5d",

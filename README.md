@@ -34,6 +34,30 @@ scripts/evals --model gpt-oss:120b --record-baseline
 
 The report covers verdict, route, and workflow accuracy, a route confusion matrix, unsafe approvals, over-blocking, tool trajectories, route calibration (Brier score and ECE), a confidence-threshold sweep, and latency. The release gate is zero unsafe approvals. The fixture tier is a keyword stand-in and scores badly on purpose; its report in `evals/reports/fixture.md` is the floor a real decider has to clear.
 
+## Tracing and drift
+
+Every request is an OpenTelemetry span carrying the decision chain: route, workflow, contract version, policy verdict, confidence, whether policy overrode the decider, tool, and outcome. Child spans cover each decision, the workflow or agent run, the Strands agent loop and tool gate, and each MCP `tools/call`. The pipeline calls only the OTel API, so with nothing configured the spans cost nothing.
+
+```bash
+scripts/observability up                          # Jaeger: UI on 127.0.0.1:16686, OTLP on :4318
+uv run python -m fs_prod_agent.desk --otlp http://127.0.0.1:4318
+```
+
+On AWS the same spans would go to an ADOT collector and on to CloudWatch and AgentCore Observability. Only the endpoint changes.
+
+`build("local", trace_log=path)` also appends each decision-chain record to a JSONL file. `scripts/drift` compares the latest window of that log with a baseline window and exits 1 on drift. Production traffic has no labels, so it watches four label-free signals: human override rate, route mix (total variation distance), mean decider confidence, and the share of failed or uncertain verdicts.
+
+`scripts/simulate-traffic --inject <change>` replays a production-like mix and injects one change part-way through:
+
+| change | what happens | first alert |
+| --- | --- | --- |
+| `confidence-decay` | a new decider is 10% less sure; every verdict is unchanged, so users see nothing | the first window after the change |
+| `decider-outage` | 30% of decisions are unavailable and fail closed | the first window after the change |
+| `route-flip` | a new decider sends 40% of workflow requests to the agent | one window later, and not in every window |
+| `input-shift` | far more orders and injection attempts | not detected |
+
+The last two rows are the limits. At 30 records a window the route mix is noisy (the steady state reaches a total variation of 0.17 against a 0.2 threshold), so a partial routing change shows late. An input shift is invisible here because the fixture decider does not refuse those requests, so its outputs barely move. A monitor on decider outputs cannot see a change the decider is blind to. That is what the scheduled eval run (`scripts/evals --model ...`) and an input-side monitor are for.
+
 ## Live run
 
 `scripts/verify` stays offline. A live run puts real models in the loop:
