@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run --frozen --quiet --project \"$CLAUDE_PROJECT_DIR\" python \"$CLAUDE_PROJECT_DIR/.grok/hooks/context_pack.py\"",
+            "command": "uv run --frozen --quiet --project \"$CLAUDE_PROJECT_DIR\" python \"$CLAUDE_PROJECT_DIR/.grok/hooks/context_pack.py\" --delta",
             "timeout": 30
           }
         ]

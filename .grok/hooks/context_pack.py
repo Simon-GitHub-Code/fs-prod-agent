@@ -3,10 +3,15 @@
 
 A read, and an edit that leaves the pack unchanged, returns the layer query.
 Exit 0 either way. Grok loads `.grok/rules/context-pack.md` at session start.
+
+--delta (Claude Code) returns only the pack lines an edit changed, plus the layer query, instead of the
+whole pack. Claude already has the pack from CLAUDE.md, so the full copy after every write only spends
+context.
 """
 
 from __future__ import annotations
 
+import difflib
 import json
 import subprocess
 import sys
@@ -18,6 +23,7 @@ BUILD = REPO / "scripts" / "context" / "build.py"
 RULES_PACK = REPO / ".grok" / "rules" / "context-pack.md"
 # additionalContext is clipped at 10000 characters by the harness.
 CONTEXT_LIMIT = 10000
+DELTA_LIMIT = 2000
 
 _EDIT_TOOLS = {"write", "edit", "search_replace", "strreplace", "multiedit"}
 _PATH_KEYS = ("target_file", "file_path", "path")
@@ -43,20 +49,27 @@ def tool_name_from(payload: dict) -> str:
     return raw if isinstance(raw, str) else ""
 
 
-def context_for(payload: dict) -> str | None:
+def context_for(payload: dict, delta: bool = False) -> str | None:
     target = path_from(payload)
     if target is None:
         return None
     changed = _rebuilt_pack() if regenerates(tool_name_from(payload)) else None
+    if changed and not delta:
+        return changed[1]
+    layer = _layer(target)
     if changed:
-        return note_for(changed, None)
-    return note_for(None, _layer(target))
-
-
-def note_for(changed_pack: str | None, layer: str | None) -> str | None:
-    if changed_pack:
-        return changed_pack
+        return pack_delta(*changed) + ("\n" + layer if layer else "")
     return layer
+
+
+def pack_delta(before: str, after: str) -> str:
+    diff = difflib.unified_diff(before.splitlines(), after.splitlines(), lineterm="", n=0)
+    lines = [line for line in diff if line[:1] in "+-" and not line.startswith(("+++", "---"))]
+    text = f"Context pack rebuilt; {len(lines)} lines changed (full pack: .grok/rules/context-pack.md):\n"
+    text += "\n".join(lines) + "\n"
+    if len(text) <= DELTA_LIMIT:
+        return text
+    return text[:DELTA_LIMIT] + "\n[more lines changed; see .grok/rules/context-pack.md]\n"
 
 
 def bounded(text: str) -> str:
@@ -79,13 +92,13 @@ def _layer(target: str) -> str | None:
     return result.stdout
 
 
-def _rebuilt_pack() -> str | None:
+def _rebuilt_pack() -> tuple[str, str] | None:
     before = _rules_text()
     result = subprocess.run([sys.executable, str(BUILD)], cwd=REPO, capture_output=True, text=True, check=False)
     after = _rules_text()
     if result.returncode != 0 or not after or after == before:
         return None
-    return after
+    return before, after
 
 
 def _rules_text() -> str:
@@ -94,10 +107,11 @@ def _rules_text() -> str:
     return RULES_PACK.read_text(encoding="utf-8")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    delta = "--delta" in (sys.argv[1:] if argv is None else argv)
     raw = sys.stdin.read()
     payload = json.loads(raw) if raw.strip() else {}
-    text = context_for(payload)
+    text = context_for(payload, delta)
     if text is None:
         return 0
     json.dump(
