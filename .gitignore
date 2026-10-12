@@ -9,3 +9,7 @@ build/
 mutants/
 .mutmut-cache
 var/
+
+# Browser automation snapshots and design-review captures.
+.playwright-mcp/
+.impeccable/review/

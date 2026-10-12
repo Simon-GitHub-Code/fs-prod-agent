@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T01:39:44Z",
+  "title": "Design System: Oversight desk",
+  "extensions": {
+    "colorMeta": {
+      "order-paper-red": {
+        "role": "primary",
+        "displayName": "Order-paper red",
+        "canonical": "oklch(46.81% 0.1523 24.87)",
+        "tonalRamp": [
+          "oklch(15.0% 0.1523 24.87)",
+          "oklch(26.4% 0.1523 24.87)",
+          "oklch(37.9% 0.1523 24.87)",
+          "oklch(49.3% 0.1523 24.87)",
+          "oklch(60.7% 0.1523 24.87)",
+          "oklch(72.1% 0.1523 24.87)",
+          "oklch(83.6% 0.1523 24.87)",
+          "oklch(95.0% 0.1523 24.87)"
+        ]
+      },
+      "minute-book-green": {
+        "role": "neutral",
+        "displayName": "Minute-book green",
+        "canonical": "oklch(32.09% 0.0424 165.92)",
+        "tonalRamp": [
+          "oklch(15.0% 0.0424 165.92)",
+          "oklch(26.4% 0.0424 165.92)",
+          "oklch(37.9% 0.0424 165.92)",
+          "oklch(49.3% 0.0424 165.92)",
+          "oklch(60.7% 0.0424 165.92)",
+          "oklch(72.1% 0.0424 165.92)",
+          "oklch(83.6% 0.0424 165.92)",
+          "oklch(95.0% 0.0424 165.92)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "oklch(15.0% 0 0)",
+          "oklch(26.4% 0 0)",
+          "oklch(37.9% 0 0)",
+          "oklch(49.3% 0 0)",
+          "oklch(60.7% 0 0)",
+          "oklch(72.1% 0 0)",
+          "oklch(83.6% 0 0)",
+          "oklch(95.0% 0 0)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(20.35% 0.0101 67.21)",
+        "tonalRamp": [
+          "oklch(15.0% 0.0101 67.21)",
+          "oklch(26.4% 0.0101 67.21)",
+          "oklch(37.9% 0.0101 67.21)",
+          "oklch(49.3% 0.0101 67.21)",
+          "oklch(60.7% 0.0101 67.21)",
+          "oklch(72.1% 0.0101 67.21)",
+          "oklch(83.6% 0.0101 67.21)",
+          "oklch(95.0% 0.0101 67.21)"
+        ]
+      },
+      "cloth-cream": {
+        "role": "neutral",
+        "displayName": "Cloth cream",
+        "canonical": "oklch(95.35% 0.0131 82.40)",
+        "tonalRamp": [
+          "oklch(15.0% 0.0131 82.40)",
+          "oklch(26.4% 0.0131 82.40)",
+          "oklch(37.9% 0.0131 82.40)",
+          "oklch(49.3% 0.0131 82.40)",
+          "oklch(60.7% 0.0131 82.40)",
+          "oklch(72.1% 0.0131 82.40)",
+          "oklch(83.6% 0.0131 82.40)",
+          "oklch(95.0% 0.0131 82.40)"
+        ]
+      },
+      "ledger-green": {
+        "role": "neutral",
+        "displayName": "Ledger green",
+        "canonical": "oklch(33.22% 0.0423 168.69)",
+        "tonalRamp": [
+          "oklch(15.0% 0.0423 168.69)",
+          "oklch(26.4% 0.0423 168.69)",
+          "oklch(37.9% 0.0423 168.69)",
+          "oklch(49.3% 0.0423 168.69)",
+          "oklch(60.7% 0.0423 168.69)",
+          "oklch(72.1% 0.0423 168.69)",
+          "oklch(83.6% 0.0423 168.69)",
+          "oklch(95.0% 0.0423 168.69)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The sheet title. Below 640px it is 2rem."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The question and the section headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "A stage name. The numeral in front of it is order-paper red."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text on the sheet. The column is 40rem wide."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "The question label and the button. Same size as body; weight marks them."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet",
+        "value": "0.55rem 0.85rem 1.7rem rgba(6, 16, 12, 0.38)",
+        "purpose": "Always, under the sheet. Not on hover. Not on the plate, the field, or the button."
+      }
+    ],
+    "motion": [
+      {
+        "name": "sheet-turn",
+        "value": "700ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The sheet turns on the Y axis, seen from 1800px of perspective. Reduced motion removes the transition and shows one face at a time."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The ink action on the sheet. Hover cuts to order-paper red.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Ask the desk</button>",
+      "css": ".ds-btn-primary { margin-top: 0.35rem; padding: 0.7rem 1.1rem; border: 0; border-radius: 0; background: #1a1612; color: #ffffff; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 600; line-height: 1.5; cursor: pointer; } .ds-btn-primary:hover { background: #9e2a2b; } .ds-btn-primary:focus-visible { outline: 2px solid #9e2a2b; outline-offset: 3px; } @media (max-width: 640px) { .ds-btn-primary { width: 100%; } }"
+    },
+    {
+      "name": "Question field",
+      "kind": "input",
+      "refersTo": "question-field",
+      "description": "The square question, ink stroke, red caret, on the sheet.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-question\">Question</label><textarea class=\"ds-question\" id=\"ds-question\" rows=\"5\">What should the desk check?</textarea></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; width: 100%; } .ds-label { color: #1a1612; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 600; line-height: 1.5; } .ds-question { width: 100%; min-height: 7.5rem; padding: 0.75rem 0.85rem; border: 1px solid #1a1612; border-radius: 0; background: #ffffff; color: #1a1612; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 400; line-height: 1.5; caret-color: #9e2a2b; resize: vertical; } .ds-question:focus-visible { outline: 2px solid #9e2a2b; outline-offset: 3px; }"
+    },
+    {
+      "name": "Outcome plate",
+      "kind": "custom",
+      "refersTo": "outcome-plate",
+      "description": "The flat ruled block for the outcome. A 1px ink border and no shadow.",
+      "html": "<div class=\"ds-plate\"><p>The outcome stays in the reading face.\nLine breaks are kept.</p></div>",
+      "css": ".ds-plate { padding: 1.05rem 1.15rem; border: 1px solid #1a1612; border-radius: 0; background: #ffffff; color: #1a1612; box-shadow: none; } .ds-plate p { margin: 0; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 400; line-height: 1.5; white-space: pre-wrap; }"
+    },
+    {
+      "name": "Turn control",
+      "kind": "nav",
+      "refersTo": "turn-control",
+      "description": "An italic cream underline on the cloth. Its focus ring is cream, not red.",
+      "html": "<div class=\"ds-turn\"><input class=\"ds-turn-control\" type=\"checkbox\" id=\"ds-turn\"><label class=\"ds-turn-label\" for=\"ds-turn\">Turn to the audit</label></div>",
+      "css": ".ds-turn { position: relative; display: inline-block; background: #1c3a2e; padding: 0.55rem 0.85rem; } .ds-turn-control { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; } .ds-turn-label { color: #f4efe6; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 400; font-style: italic; line-height: 1.5; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; cursor: pointer; } .ds-turn-label:hover { color: #ffffff; } .ds-turn-control:focus-visible + .ds-turn-label { outline: 2px solid #f4efe6; outline-offset: 4px; }"
+    },
+    {
+      "name": "Stage list",
+      "kind": "custom",
+      "refersTo": "stage-list",
+      "description": "Audit order in red numerals. A stage that did not run is struck through in ink.",
+      "html": "<ol class=\"ds-stages\"><li><h3 class=\"ds-stage-name\">Context</h3><p>The stage ran.</p></li><li><h3 class=\"ds-stage-name ds-stage-idle\"><span class=\"ds-sr\">Did not run. </span>Execute</h3><p>The stage did not run.</p></li></ol>",
+      "css": ".ds-stages { margin: 0; padding: 0; list-style: none; counter-reset: stage; background: #ffffff; color: #1a1612; font-family: \"Source Serif 4\", serif; } .ds-stages li { position: relative; margin-top: 1.45rem; counter-increment: stage; } .ds-stages li:first-child { margin-top: 0; } .ds-stage-name { margin: 0 0 0.3rem; color: #1a1612; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.3; } .ds-stage-name::before { content: counter(stage) \". \"; color: #9e2a2b; } .ds-stage-idle { text-decoration: line-through; text-decoration-thickness: 1.5px; text-decoration-color: #1a1612; } .ds-stages p { margin: 0; font-size: 1.0625rem; font-weight: 400; line-height: 1.5; white-space: pre-line; } .ds-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }"
+    },
+    {
+      "name": "Sheet",
+      "kind": "custom",
+      "refersTo": "sheet",
+      "description": "White paper on the cloth, square, with the only shadow and one red rule.",
+      "html": "<div class=\"ds-cloth\"><div class=\"ds-sheet-shadow\"><article class=\"ds-sheet\"><h1 class=\"ds-title\">Oversight desk</h1><div class=\"ds-rule\"></div><p>The reading sits on the sheet.</p></article></div></div>",
+      "css": ".ds-cloth { background: #1c3a2e; padding: 1.6rem 1.25rem 4rem; } .ds-sheet-shadow { background: transparent; box-shadow: 0.55rem 0.85rem 1.7rem rgba(6, 16, 12, 0.38); } .ds-sheet { background: #ffffff; color: #1a1612; padding: 2.4rem 2.3rem 2.6rem; border-radius: 0; } .ds-title { margin: 0 0 0.7rem; color: #1a1612; font-family: \"Source Serif 4\", serif; font-size: 2.4rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; } .ds-rule { height: 1px; margin: 0 0 1.25rem; border: 0; background: #9e2a2b; } .ds-sheet p { margin: 0.8rem 0 0; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 400; line-height: 1.5; }"
+    },
+    {
+      "name": "Sheet link",
+      "kind": "nav",
+      "refersTo": "sheet-link",
+      "description": "Ink words on the sheet with a 1px order-paper red underline.",
+      "html": "<a class=\"ds-link\" href=\"#case\">A worked case</a>",
+      "css": ".ds-link { background: #ffffff; color: #1a1612; font-family: \"Source Serif 4\", serif; font-size: 1.0625rem; font-weight: 400; line-height: 1.5; text-decoration-color: #9e2a2b; text-decoration-thickness: 1px; text-underline-offset: 0.18em; } .ds-link:hover { color: #9e2a2b; } .ds-link:focus-visible { outline: 2px solid #9e2a2b; outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Parliamentary Order Paper",
+    "overview": "The Parliamentary Order Paper is one white sheet on a minute-book green cloth. A single serif, one red rule, and square cuts do the work. The sheet is where the reading sits. The cloth is the table under it. Density follows a printed paper: a title, a rule, prose, a field, and a flat plate. Equal cards, status lamps, and a monospace costume are not part of this system.\n\nSource Serif 4 is self-hosted and falls back to serif. Weight 600 carries the title, the headings, the label, and the button. Weight 400 is the reading text. Italic 400 is the turn control and the asides. Corners stay at zero. The sheet casts the only shadow. The outcome is a plate with a 1px ink border and no shadow. The sheet turns to its other face, and reduced motion swaps the faces with no animation.\n\nRegions separate by a line, not by a tint. Ink reads on paper, cream reads on the cloth, and ledger green is only the italic aside. A stage that did not run is struck through in ink. Red is the rule, the caret, the underline, the focus ring on the sheet, or the hover.",
+    "keyCharacteristics": [
+      "White paper on minute-book green cloth",
+      "One red accent, used as a rule rather than a resting fill",
+      "Source Serif 4 only, self-hosted",
+      "Square corners (0)",
+      "One soft shadow, under the sheet",
+      "Idle stages struck through in ink, not recolored"
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Order-paper red is a line, a caret, an underline, a focus ring on the sheet, or a hover. It is not a second background, and it is not a status lamp.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ground Rule",
+        "body": "Cream is the text on the cloth. Ink is the text on the sheet. Ledger green is only the italic aside.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Face Rule",
+        "body": "Source Serif 4 sets every role. Do not add a sans, and do not add a monospace face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Loaded Weights Rule",
+        "body": "The files are roman 400, roman 600, and italic 400, and the page turns synthesis off. Do not call for a bold italic.",
+        "section": "typography"
+      },
+      {
+        "name": "The Column Rule",
+        "body": "The scene is one centered column at the narrower of 40rem and the viewport. Below 640px the column stays full width and the button stretches to it.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Shadow Rule",
+        "body": "The sheet carries the shadow 0.55rem 0.85rem 1.7rem rgba(6, 16, 12, 0.38). The plate, the field, and the button stay flat. A region on the paper separates with a 1px ink border, not a second shadow.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Still Turn Rule",
+        "body": "The sheet turns on the Y axis in 700ms with cubic-bezier(0.16, 1, 0.3, 1), seen from 1800px of perspective. Reduced motion removes the transition and shows one face at a time.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Square Cut Rule",
+        "body": "Radius is 0 on the button, the field, the plate, and the sheet. Do not round them.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Strike Rule",
+        "body": "A stage that did not run is struck through in ink at 1.5px. Its color does not change.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do set reading text in ink on paper, and cloth text in cream on minute-book green.",
+      "Do use self-hosted Source Serif 4 at roman 400, roman 600, or italic 400, with a serif fallback.",
+      "Do keep the radius at 0, and separate a region on the paper with a 1px ink border.",
+      "Do use the sheet shadow 0.55rem 0.85rem 1.7rem rgba(6, 16, 12, 0.38), and no other shadow.",
+      "Do strike an idle stage in ink, and keep order-paper red to the rule, the caret, the underline, the sheet's focus ring, and the hover."
+    ],
+    "donts": [
+      "Don't round the button, the field, the plate, or the sheet.",
+      "Don't add a second typeface, a monospace face, or a weight the font files do not contain.",
+      "Don't shadow the plate, the field, or the button.",
+      "Don't use order-paper red as a resting fill, or as a status lamp beside green or amber.",
+      "Don't put cream on the sheet or ink on the cloth. The turn control's focus ring stays cream, because red on the cloth does not read."
+    ]
+  }
+}
